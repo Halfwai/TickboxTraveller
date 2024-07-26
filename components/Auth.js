@@ -3,6 +3,10 @@ import { Alert, StyleSheet, View, AppState, Image, Text } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { Button, Input } from '@rneui/themed'
 
+import ImageUploader from './imageUploader'
+
+import * as ImagePicker from 'expo-image-picker'
+
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
 // `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
@@ -21,6 +25,10 @@ export default function Auth() {
     const [loading, setLoading] = useState(false);
 
     const [signingUp, setSigningUp] = useState(false);
+
+    const [avatarUrl, setAvatarUrl] = useState(null)
+    const [uploading, setUploading] = useState(false)
+    const [imageName, setImageName] = useState(null)
 
     async function signInWithEmail() {
         setLoading(true)
@@ -48,53 +56,180 @@ export default function Auth() {
             setLoading(false)
     }
 
-    return (
-        <View style={styles.container}>            
-            <View style={styles.headingContainer}>
-                <Image 
-                    source={require("../assets/images/icon.png")}
-                    style={styles.logo}
-                    resizeMode='contain'
-                />
-                <Text style={styles.headingText}>Tickbox Traveller</Text>
-            </View>
-            <View style={styles.signInContainer}>
-                <Text style={styles.subheadingText}>Sign In</Text>
-                <View style={styles.inputContainer}>
-                    <Input
-                        leftIcon={{ type: 'font-awesome', name: 'envelope', color: 'lightgray' }}
-                        onChangeText={(text) => setEmail(text)}
-                        value={email}
-                        placeholder="email@address.com"
-                        autoCapitalize={'none'}
-                        style={styles.input}
-                        selectionColor={"white"}
+    async function uploadAvatar() {
+        try {
+            console.log(imageName);
+            if(imageName != null){
+                const response = await supabase
+                    .from('avatars')
+                    .delete()
+                    .eq('name', imageName)
+                console.log(response);
+                console.log(`${imageName} deleted`);
+                setImageName(null);
+                
+            }
+
+            setUploading(true)
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images, // Restrict to only images
+                allowsMultipleSelection: false, // Can only select one image
+                allowsEditing: true, // Allows the user to crop / rotate their photo before uploading it
+                quality: 1,
+                exif: false, // We don't want nor need that data.
+            })
+
+            if (result.canceled || !result.assets || result.assets.length === 0) {
+                console.log('User cancelled image picker.')
+                return
+            }
+
+            const image = result.assets[0]
+            console.log('Got image', image)
+
+            setAvatarUrl(image.uri);
+            setImageName(image.fileName);
+
+            if (!image.uri) {
+                throw new Error('No image uri!') // Realistically, this should never happen, but just in case...
+            }
+
+            const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
+
+            const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
+            const path = `${Date.now()}.${fileExt}`
+            const { data, error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(path, arraybuffer, {
+                contentType: image.mimeType ?? 'image/jpeg',
+                })
+                if (uploadError) {
+                    throw uploadError
+                }
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert(error.message)
+            } else {
+                throw error
+        }
+        } finally {
+            setUploading(false)
+        }
+    }
+
+
+    if (!signingUp){
+        return (
+            <View style={styles.container}>            
+                <View style={styles.headingContainer}>
+                    <Image 
+                        source={require("../assets/images/icon.png")}
+                        style={styles.logo}
+                        resizeMode='contain'
                     />
+                    <Text style={styles.headingText}>Tickbox Traveller</Text>
                 </View>
-                <View style={styles.inputContainer}>
-                    <Input
-                        leftIcon={{ type: 'font-awesome', name: 'lock', color: 'lightgray' }}
-                        onChangeText={(text) => setPassword(text)}
-                        value={password}
-                        secureTextEntry={true}
-                        placeholder="Password"
-                        autoCapitalize={'none'}
-                        style={styles.input}
-                        selectionColor={"white"}
+                <View style={styles.signInContainer}>
+                    <Text style={styles.subheadingText}>Sign In</Text>
+                    <View style={styles.inputContainer}>
+                        <Input
+                            leftIcon={{ type: 'font-awesome', name: 'envelope', color: 'lightgray' }}
+                            onChangeText={(text) => setEmail(text)}
+                            value={email}
+                            placeholder="email@address.com"
+                            autoCapitalize={'none'}
+                            style={styles.input}
+                            selectionColor={"white"}
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Input
+                            leftIcon={{ type: 'font-awesome', name: 'lock', color: 'lightgray' }}
+                            onChangeText={(text) => setPassword(text)}
+                            value={password}
+                            secureTextEntry={true}
+                            placeholder="Password"
+                            autoCapitalize={'none'}
+                            style={styles.input}
+                            selectionColor={"white"}
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+                    </View>
+                </View>
+                <View style={styles.signUpContainer}>
+                    <Text style={styles.subheadingText}>Not a member? Sign up here</Text>
+                    <View style={styles.inputContainer}>
+                        <Button title="Sign up" disabled={loading} onPress={() => setSigningUp(true)} />
+                    </View>
+                </View>
+            </View>
+        )
+    } else {
+        return (
+            <View style={styles.container}>            
+                <View style={styles.headingContainer}>
+                    <Image 
+                        source={require("../assets/images/icon.png")}
+                        style={styles.logo}
+                        resizeMode='contain'
                     />
+                    <Text style={styles.headingText}>Tickbox Traveller</Text>
                 </View>
-                <View style={styles.inputContainer}>
-                    <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+                <View style={styles.signInContainer}>
+                    <Text style={styles.subheadingText}>Sign In</Text>
+                    <View style={styles.inputContainer}>
+                        <Input
+                            leftIcon={{ type: 'font-awesome', name: 'envelope', color: 'lightgray' }}
+                            onChangeText={(text) => setEmail(text)}
+                            value={email}
+                            placeholder="email@address.com"
+                            autoCapitalize={'none'}
+                            style={styles.input}
+                            selectionColor={"white"}
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Input
+                            leftIcon={{ type: 'font-awesome', name: 'lock', color: 'lightgray' }}
+                            onChangeText={(text) => setPassword(text)}
+                            value={password}
+                            secureTextEntry={true}
+                            placeholder="Password"
+                            autoCapitalize={'none'}
+                            style={styles.input}
+                            selectionColor={"white"}
+                        />
+                    </View>
+
+                    <View style={[styles.inputContainer, styles.imageInputContainer]}>
+                        <Image 
+                            source={{ uri: avatarUrl }}
+                            style={styles.logo}
+                            resizeMode='contain'
+                        />
+                        <Button 
+                            title="Upload Profile Picture"
+                            onPress={() => {
+                                uploadAvatar();
+                            }}
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+                    </View>
+                </View>
+                <View style={styles.signUpContainer}>
+                    <View style={styles.inputContainer}>
+                        <Button title="Back to sign in page" disabled={loading} onPress={() => setSigningUp(false)} />
+                    </View>
                 </View>
             </View>
-            <View style={styles.signUpContainer}>
-                <Text style={styles.subheadingText}>Not a member? Sign up here</Text>
-                <View style={styles.inputContainer}>
-                    <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
-                </View>
-            </View>
-        </View>
-    )
+        )
+    }
+    
 }
 
 const styles = StyleSheet.create({
@@ -143,5 +278,9 @@ const styles = StyleSheet.create({
     input: {
         color: 'white',
     },
+    imageInputContainer: {
+        flexDirection: "row",
+        alignItems: "center"
+    }
 
 })
