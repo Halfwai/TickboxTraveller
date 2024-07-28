@@ -22,12 +22,14 @@ AppState.addEventListener('change', (state) => {
 export default function Auth() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [loading, setLoading] = useState(false);
 
     const [signingUp, setSigningUp] = useState(false);
 
     const [uploading, setUploading] = useState(false)
     const [image, setImage] = useState(null);
+    const [fullName, setFullName] = useState('');
 
     async function signInWithEmail() {
         setLoading(true)
@@ -48,26 +50,75 @@ export default function Auth() {
         } = await supabase.auth.signUp({
             email: email,
             password: password,
+            options: {
+                data: {
+                    full_name: fullName,
+                    avatar_url: image.uri
+                }
+            },
         })
 
         if (error) Alert.alert(error.message)
-        if (!session) Alert.alert('Please check your inbox for email verification!')
-            setLoading(false)
+        // if (!session) Alert.alert('Please check your inbox for email verification!')
+        //     setLoading(false)
+
+        saveImage();
+        updateUser();
+
+
+    }
+
+    async function updateUser(){
+        try {
+            const updates = {
+                id: session?.user.id,
+                fullName,
+                avatar_url: image.uri,
+                updated_at: new Date(),
+            }
+        
+            const { error } = await supabase.from('profiles').upsert(updates)
+        
+            if (error) {
+                throw error
+            }
+        } catch (error) {
+          if (error instanceof Error) {
+            Alert.alert(`Error is here: ${error.message}`);
+          }
+        } finally {
+          setLoading(false)
+        }
+    }
+
+    async function saveImage(){
+        // if (!image.uri) {
+        //     throw new Error('No image uri!') // Realistically, this should never happen, but just in case...
+        // }
+        try {
+            const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
+
+            const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
+            const path = `${Date.now()}.${fileExt}`
+            const { data, error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(path, arraybuffer, {
+                contentType: image.mimeType ?? 'image/jpeg',
+                })
+                if (uploadError) {
+                    throw uploadError
+                }
+        } catch {
+            if (error instanceof Error) {
+                Alert.alert(error.message)
+            } else {
+                throw error
+            }
+        }
     }
 
     async function uploadAvatar() {
         try {
-            if(image != null){
-                const response = await supabase
-                    .from('avatars')
-                    .delete()
-                    .eq('name', image.fileName)
-                console.log(response);
-                console.log(`${image.fileName} deleted`);
-                setImage(null);
-                
-            }
-
             setUploading(true)
 
             const result = await ImagePicker.launchImageLibraryAsync({
@@ -86,22 +137,7 @@ export default function Auth() {
             await setImage(result.assets[0]);
             console.log('Got image', image)
 
-            // if (!image.uri) {
-            //     throw new Error('No image uri!') // Realistically, this should never happen, but just in case...
-            // }
 
-            // const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
-
-            // const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
-            // const path = `${Date.now()}.${fileExt}`
-            // const { data, error: uploadError } = await supabase.storage
-            //     .from('avatars')
-            //     .upload(path, arraybuffer, {
-            //     contentType: image.mimeType ?? 'image/jpeg',
-            //     })
-            //     if (uploadError) {
-            //         throw uploadError
-            //     }
         } catch (error) {
             if (error instanceof Error) {
                 Alert.alert(error.message)
@@ -112,7 +148,6 @@ export default function Auth() {
             setUploading(false)
         }
     }
-
 
     if (!signingUp){
         return (
@@ -154,7 +189,7 @@ export default function Auth() {
                         <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
                     </View>
                 </View>
-                <View style={styles.signUpContainer}>
+                <View style={styles.signUpButtonContainer}>
                     <Text style={styles.subheadingText}>Not a member? Sign up here</Text>
                     <View style={styles.inputContainer}>
                         <Button title="Sign up" disabled={loading} onPress={() => setSigningUp(true)} />
@@ -173,8 +208,19 @@ export default function Auth() {
                     />
                     <Text style={styles.headingText}>Tickbox Traveller</Text>
                 </View>
-                <View style={styles.signInContainer}>
+                <View style={styles.signUpContainer}>
                     <Text style={styles.subheadingText}>Sign In</Text>
+                    <View style={styles.inputContainer}>
+                        <Input
+                            leftIcon={{ type: 'font-awesome', name: 'envelope', color: 'lightgray' }}
+                            onChangeText={(text) => setFullName(text)}
+                            value={fullName}
+                            placeholder="User Name"
+                            autoCapitalize={'none'}
+                            style={styles.input}
+                            selectionColor={"white"}
+                        />
+                    </View>
                     <View style={styles.inputContainer}>
                         <Input
                             leftIcon={{ type: 'font-awesome', name: 'envelope', color: 'lightgray' }}
@@ -199,13 +245,31 @@ export default function Auth() {
                         />
                     </View>
 
+                    <View style={styles.inputContainer}>
+                        <Input
+                            leftIcon={{ type: 'font-awesome', name: 'lock', color: 'lightgray' }}
+                            onChangeText={(text) => setPassword(text)}
+                            value={passwordConfirmation}
+                            secureTextEntry={true}
+                            placeholder="Password Confirmation"
+                            autoCapitalize={'none'}
+                            style={styles.input}
+                            selectionColor={"white"}
+                        />
+                    </View>
+
                     <View style={[styles.inputContainer, styles.imageInputContainer]}>
+                        {image != null ? 
                         <Image 
-                            {...image != null ? source={ uri: image.uri } : source = {}}
+                            source={{ uri: image.uri }}
                             style={styles.logo}
                             resizeMode='contain'
-                        />
-                        <Button 
+                        /> :                         
+                        <Image 
+                        style={styles.logo}
+                        resizeMode='contain'
+                    />}
+                        <Button
                             title="Upload Profile Picture"
                             onPress={() => {
                                 uploadAvatar();
@@ -213,10 +277,8 @@ export default function Auth() {
                         />
                     </View>
                     <View style={styles.inputContainer}>
-                        <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+                        <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
                     </View>
-                </View>
-                <View style={styles.signUpContainer}>
                     <View style={styles.inputContainer}>
                         <Button title="Back to sign in page" disabled={loading} onPress={() => setSigningUp(false)} />
                     </View>
@@ -248,7 +310,7 @@ const styles = StyleSheet.create({
         borderColor: "white",
         alignItems: "center"
     },
-    signUpContainer: {
+    signUpButtonContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center"
@@ -268,7 +330,7 @@ const styles = StyleSheet.create({
         height: 100
     },
     inputContainer: {
-        width: "100%"
+        width: "100%",
     },
     input: {
         color: 'white',
@@ -276,6 +338,9 @@ const styles = StyleSheet.create({
     imageInputContainer: {
         flexDirection: "row",
         alignItems: "center"
+    },
+    signUpContainer: {
+        flex: 3        
     }
 
 })

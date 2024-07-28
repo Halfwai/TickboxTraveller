@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert } from 'react-native'
+import { StyleSheet, View, Alert, Image } from 'react-native'
 import { Button, Input } from '@rneui/themed'
 
 export default function MainApp({ session }) {
   const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
+  const [fullName, setFullName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
 
   useEffect(() => {
@@ -20,7 +19,7 @@ export default function MainApp({ session }) {
 
       const { data, error, status } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
+        .select(`full_name, avatar_url`)
         .eq('id', session?.user.id)
         .single()
       if (error && status !== 406) {
@@ -28,11 +27,12 @@ export default function MainApp({ session }) {
       }
 
       if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
+        console.log(data);
+        setFullName(data.full_name)
         setAvatarUrl(data.avatar_url)
       }
     } catch (error) {
+        console.log(error)
       if (error instanceof Error) {
         Alert.alert(error.message)
       }
@@ -42,8 +42,7 @@ export default function MainApp({ session }) {
   }
 
   async function updateProfile({
-    username,
-    website,
+    fullName,
     avatar_url,
   }) {
     try {
@@ -52,8 +51,7 @@ export default function MainApp({ session }) {
 
       const updates = {
         id: session?.user.id,
-        username,
-        website,
+        fullName,
         avatar_url,
         updated_at: new Date(),
       }
@@ -71,23 +69,24 @@ export default function MainApp({ session }) {
       setLoading(false)
     }
   }
-
   return (
     <View style={styles.container}>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input label="Email" value={session?.user?.email} disabled />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input label="Username" value={username || ''} onChangeText={(text) => setUsername(text)} />
+        <Input label="Full Name" value={fullName || ''} onChangeText={(text) => setFullName(text)} />
       </View>
-      <View style={styles.verticallySpaced}>
-        <Input label="Website" value={website || ''} onChangeText={(text) => setWebsite(text)} />
-      </View>
-
+      {avatarUrl ? 
+      <Image
+          source={{ uri: avatarUrl }}
+          accessibilityLabel="Avatar"
+          style={{height: 100, width: 100}}
+        /> : <></>}
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button
           title={loading ? 'Loading ...' : 'Update'}
-          onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
+          onPress={() => updateProfile({ fullName, avatar_url: avatarUrl })}
           disabled={loading}
         />
       </View>
