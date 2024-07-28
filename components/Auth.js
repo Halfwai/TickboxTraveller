@@ -26,9 +26,8 @@ export default function Auth() {
 
     const [signingUp, setSigningUp] = useState(false);
 
-    const [avatarUrl, setAvatarUrl] = useState(null)
     const [uploading, setUploading] = useState(false)
-    const [imageName, setImageName] = useState(null)
+    const [image, setImage] = useState(null);
 
     async function signInWithEmail() {
         setLoading(true)
@@ -58,15 +57,14 @@ export default function Auth() {
 
     async function uploadAvatar() {
         try {
-            console.log(imageName);
-            if(imageName != null){
+            if(image != null){
                 const response = await supabase
                     .from('avatars')
                     .delete()
-                    .eq('name', imageName)
+                    .eq('name', image.fileName)
                 console.log(response);
-                console.log(`${imageName} deleted`);
-                setImageName(null);
+                console.log(`${image.fileName} deleted`);
+                setImage(null);
                 
             }
 
@@ -85,28 +83,25 @@ export default function Auth() {
                 return
             }
 
-            const image = result.assets[0]
+            await setImage(result.assets[0]);
             console.log('Got image', image)
 
-            setAvatarUrl(image.uri);
-            setImageName(image.fileName);
+            // if (!image.uri) {
+            //     throw new Error('No image uri!') // Realistically, this should never happen, but just in case...
+            // }
 
-            if (!image.uri) {
-                throw new Error('No image uri!') // Realistically, this should never happen, but just in case...
-            }
+            // const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
 
-            const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
-
-            const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
-            const path = `${Date.now()}.${fileExt}`
-            const { data, error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(path, arraybuffer, {
-                contentType: image.mimeType ?? 'image/jpeg',
-                })
-                if (uploadError) {
-                    throw uploadError
-                }
+            // const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
+            // const path = `${Date.now()}.${fileExt}`
+            // const { data, error: uploadError } = await supabase.storage
+            //     .from('avatars')
+            //     .upload(path, arraybuffer, {
+            //     contentType: image.mimeType ?? 'image/jpeg',
+            //     })
+            //     if (uploadError) {
+            //         throw uploadError
+            //     }
         } catch (error) {
             if (error instanceof Error) {
                 Alert.alert(error.message)
@@ -206,7 +201,7 @@ export default function Auth() {
 
                     <View style={[styles.inputContainer, styles.imageInputContainer]}>
                         <Image 
-                            source={{ uri: avatarUrl }}
+                            {...image != null ? source={ uri: image.uri } : source = {}}
                             style={styles.logo}
                             resizeMode='contain'
                         />
