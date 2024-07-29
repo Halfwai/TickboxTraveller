@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from './lib/supabase'
-import Auth from './components/Auth'
-import MainApp from './components/MainApp'
+import Auth from './routes/Auth'
+import MainApp from './routes/MainApp'
 import { View, Text } from 'react-native'
 import * as Font from 'expo-font';
 
