@@ -1,24 +1,33 @@
-import React, { useState, createContext, useContext  } from 'react'
-import { Alert, StyleSheet, View, AppState, Image, Text } from 'react-native'
+import React, { useState, useContext  } from 'react'
+import { Alert, StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { Button, Input } from '@rneui/themed'
+import * as ImagePicker from 'expo-image-picker'
+
+import { AuthContext } from '../context/Context'
+import { CustomButton } from './GenericComponents'
 
 
-export const SignUp = (props) => {
-    const [fullName, setFullName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+
+export const SignUp = () => {
+
+    const { emailState, passwordState, setSigningUp } = useContext(AuthContext);
+    const [email, setEmail] = emailState;
+    const [password, setPassword] = passwordState;
+
+    const [hidePassword, setHidePassword] = useState(true);
+    const [hideConfirmationPassword, setHideConfirmationPassword] = useState(true);
+
+    const [userName, setUserName] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [image, setImage] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(false);
 
     async function signUpWithEmail() {
-        if (password != passwordConfirmation){
-            Alert.alert('Passwords do not match, please check and try again');
+        if (!validateInput()){
             return;
         }
-
 
         setLoading(true)
         const {
@@ -29,13 +38,19 @@ export const SignUp = (props) => {
             password: password,
             options: {
                 data: {
-                    full_name: fullName,
-                    avatar_url: image.uri
+                    username: userName,
+                    avatar_url: image != null ? image.uri : ""
                 }
             },
         })
 
-        if (error) Alert.alert(error.message)
+        if (error){
+            if (error.message === "Database error saving new user"){
+                Alert.alert("User name already in use. Please try different user name")
+            } else {
+                Alert.alert(error.message)
+            }            
+        } 
         // if (!session) Alert.alert('Please check your inbox for email verification!')
         setLoading(false)
 
@@ -60,9 +75,7 @@ export const SignUp = (props) => {
                 return
             }
 
-            await setImage(result.assets[0]);
-            console.log('Got image', image)
-
+            setImage(result.assets[0]);
 
         } catch (error) {
             if (error instanceof Error) {
@@ -73,6 +86,22 @@ export const SignUp = (props) => {
         } finally {
             setUploading(false)
         }
+    }
+
+    const validateInput = () => {
+        if (userName == ''){
+            Alert.alert('Please input user name');
+            return false;
+        }
+        if (password == ""){
+            Alert.alert('Please input password')
+            return false;
+        }
+        if (password != passwordConfirmation){
+            Alert.alert('Passwords do not match, please check and try again');
+            return false;
+        }
+        return true;
     }
 
 
@@ -87,12 +116,12 @@ export const SignUp = (props) => {
                 <Text style={styles.headingText}>Tickbox Traveller</Text>
             </View>
             <View style={styles.signUpContainer}>
-                <Text style={styles.subheadingText}>Sign In</Text>
+                <Text style={styles.subheadingText}>Sign Up</Text>
                 <View style={styles.inputContainer}>
                     <Input
                         leftIcon={{ type: 'font-awesome', name: 'envelope', color: 'lightgray' }}
-                        onChangeText={(text) => setFullName(text)}
-                        value={fullName}
+                        onChangeText={(text) => setUserName(text)}
+                        value={userName}
                         placeholder="User Name"
                         autoCapitalize={'none'}
                         style={styles.input}
@@ -113,9 +142,12 @@ export const SignUp = (props) => {
                 <View style={styles.inputContainer}>
                     <Input
                         leftIcon={{ type: 'font-awesome', name: 'lock', color: 'lightgray' }}
+                        rightIcon={{ type: 'font-awesome', name: hidePassword ? 'eye':'eye-slash', color: 'lightgray', onPress: () => {
+                            setHidePassword(!hidePassword);
+                        } }}
                         onChangeText={(text) => setPassword(text)}
                         value={password}
-                        secureTextEntry={true}
+                        secureTextEntry={hidePassword}
                         placeholder="Password"
                         autoCapitalize={'none'}
                         style={styles.input}
@@ -126,9 +158,12 @@ export const SignUp = (props) => {
                 <View style={styles.inputContainer}>
                     <Input
                         leftIcon={{ type: 'font-awesome', name: 'lock', color: 'lightgray' }}
+                        rightIcon={{ type: 'font-awesome', name: hideConfirmationPassword ? 'eye':'eye-slash', color: 'lightgray', onPress: () => {
+                            setHideConfirmationPassword(!hideConfirmationPassword);
+                        } }}
                         onChangeText={(text) => setPasswordConfirmation(text)}
                         value={passwordConfirmation}
-                        secureTextEntry={true}
+                        secureTextEntry={hideConfirmationPassword}
                         placeholder="Password Confirmation"
                         autoCapitalize={'none'}
                         style={styles.input}
@@ -144,21 +179,33 @@ export const SignUp = (props) => {
                         resizeMode='contain'
                     /> :                         
                     <Image 
-                    style={styles.logo}
-                    resizeMode='contain'
-                />}
-                    <Button
-                        title={uploading ? 'Uploading ...' : 'Upload Profile Picture'}
-                        onPress={() => {
-                            uploadAvatar();
-                        }}
+                        style={styles.logo}
+                        resizeMode='contain'
+                    />}
+                    <CustomButton 
+                        action={() => 
+                            uploadAvatar()
+                        }
+                        text={uploading ? 'Uploading ...' : 'Upload Profile Picture'}
+                        style={{width: "60%"}}
                     />
                 </View>
                 <View style={styles.inputContainer}>
-                    <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+                    <CustomButton 
+                        action={() => {
+                            signUpWithEmail()
+                        }}
+                        text={"Sign Up"}
+                        disabled={loading} 
+                    />
                 </View>
                 <View style={styles.inputContainer}>
-                    <Button title="Back to sign in page" disabled={loading} onPress={() => setSigningUp(false)} />
+                    <CustomButton 
+                        action={() => {
+                            setSigningUp(false)
+                        }}
+                        text={"Back to sign in page"}
+                    />
                 </View>
             </View>
         </View>
@@ -180,17 +227,6 @@ const styles = StyleSheet.create({
         borderColor: 'white',
         marginTop:20
     },
-    signInContainer: {
-        flex: 2,
-        borderBottomWidth: 2,
-        borderColor: "white",
-        alignItems: "center"
-    },
-    signUpButtonContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center"
-    },
     headingText: {
         fontSize: 50,
         color: "white"
@@ -207,16 +243,33 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: "100%",
+        flex: 1
     },
     input: {
         color: 'white',
     },
     imageInputContainer: {
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 20
     },
     signUpContainer: {
-        flex: 3        
+        flex: 3,
+        alignItems: "center"  
+    },
+    button: {
+        backgroundColor: "#51A6F5",
+        width: "100%",
+        height: "60%",
+        color: "black",
+        borderRadius: 10,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 15
     }
-
 })

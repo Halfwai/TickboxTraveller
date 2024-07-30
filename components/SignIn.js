@@ -4,14 +4,14 @@ import { supabase } from '../lib/supabase'
 import { Button, Input } from '@rneui/themed'
 
 import { AuthContext } from '../context/Context'
+import { CustomButton } from './GenericComponents'
 
 
-export const SignIn = (props) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+export const SignIn = () => {
+    const { emailState, passwordState, setSigningUp } = useContext(AuthContext);
+    const [email, setEmail] = emailState;
+    const [password, setPassword] = passwordState;
     const [loading, setLoading] = useState(false);
-
-    const { setSigningUp } = useContext(AuthContext);
 
     async function signInWithEmail() {
         setLoading(true)
@@ -23,7 +23,6 @@ export const SignIn = (props) => {
         if (error) Alert.alert(error.message)
             setLoading(false)
     }
-
 
     return (
         <View style={styles.container}>            
@@ -61,13 +60,24 @@ export const SignIn = (props) => {
                     />
                 </View>
                 <View style={styles.inputContainer}>
-                    <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+                    <CustomButton 
+                        action={() => {
+                            signInWithEmail()
+                        }}
+                        text={"Sign in"}
+                        disabled={loading}
+                    />
                 </View>
             </View>
             <View style={styles.signUpButtonContainer}>
                 <Text style={styles.subheadingText}>Not a member? Sign up here</Text>
                 <View style={styles.inputContainer}>
-                    <Button title="Sign up" disabled={loading} onPress={() => setSigningUp(true)} />
+                    <CustomButton 
+                        action={() => {
+                            setSigningUp(true)
+                        }}
+                        text={"Sign up"}
+                    />
                 </View>
             </View>
         </View>
@@ -120,12 +130,4 @@ const styles = StyleSheet.create({
     input: {
         color: 'white',
     },
-    imageInputContainer: {
-        flexDirection: "row",
-        alignItems: "center"
-    },
-    signUpContainer: {
-        flex: 3        
-    }
-
 })

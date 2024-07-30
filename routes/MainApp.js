@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert, Image } from 'react-native'
+import { StyleSheet, View, Alert, Image, Text } from 'react-native'
 import { Button, Input } from '@rneui/themed'
+import { StatusBar } from 'expo-status-bar';
+
+
+import * as React from 'react';
+import { HomeScreen } from '../components/HomeScreen';
+
 
 export default function MainApp({ session }) {
   const [loading, setLoading] = useState(true)
@@ -19,7 +25,7 @@ export default function MainApp({ session }) {
 
       const { data, error, status } = await supabase
         .from('profiles')
-        .select(`full_name, avatar_url`)
+        .select(`username, avatar_url`)
         .eq('id', session?.user.id)
         .single()
       if (error && status !== 406) {
@@ -41,74 +47,53 @@ export default function MainApp({ session }) {
     }
   }
 
-  async function updateProfile({
-    fullName,
-    avatar_url,
-  }) {
-    try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
-
-      const updates = {
-        id: session?.user.id,
-        fullName,
-        avatar_url,
-        updated_at: new Date(),
-      }
-
-      const { error } = await supabase.from('profiles').upsert(updates)
-
-      if (error) {
-        throw error
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
   return (
     <View style={styles.container}>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email} disabled />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Input label="Full Name" value={fullName || ''} onChangeText={(text) => setFullName(text)} />
-      </View>
-      {avatarUrl ? 
-      <Image
-          source={{ uri: avatarUrl }}
-          accessibilityLabel="Avatar"
-          style={{height: 100, width: 100}}
-        /> : <></>}
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button
-          title={loading ? 'Loading ...' : 'Update'}
-          onPress={() => updateProfile({ fullName, avatar_url: avatarUrl })}
-          disabled={loading}
-        />
-      </View>
+        <View style={styles.headerContainer}>
+            <Image 
+                    source={require("../assets/images/icon.png")}
+                    style={styles.logo}
+                    resizeMode='contain'
+                />
+            <Text style={styles.headingText}>Tickbox Traveller</Text>
+        </View>
+        <View style={styles.contentContainer}>
+            <HomeScreen />
+        </View>
+        <View style={styles.footerContainer}>
 
-      <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
-      </View>
+        </View>
+        <StatusBar style="auto" />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 40,
-    padding: 12,
-  },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: 'stretch',
-  },
-  mt20: {
-    marginTop: 20,
-  },
+    container: {
+        height: "100%",
+        padding: 0
+    },
+    headerContainer: {
+        flex: 1,
+        paddingTop: 30,
+        backgroundColor: "#1D4A7A",
+        flexDirection: "row",
+        alignItems: "center",
+        // width: "100%",
+        // justifyContent: "space-between"
+    },
+    logo: {
+        width: 100,
+        height: "100%",
+        margin: 0
+    },
+    headingText: {
+        fontSize: 30,
+    },
+    contentContainer: {
+        flex: 6
+    },
+    footerContainer: {
+        flex: 1
+    }
 })
