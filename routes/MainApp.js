@@ -58,7 +58,7 @@ export default function MainApp({ session }) {
             <Text style={styles.headingText}>Tickbox Traveller</Text>
         </View>
         <View style={styles.contentContainer}>
-            <HomeScreen />
+            <HomeScreen session={session}/>
         </View>
         <View style={styles.footerContainer}>
 
