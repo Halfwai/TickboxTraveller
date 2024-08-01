@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { StyleSheet, View, Alert, Image, Text } from 'react-native'
-import { Button, Input } from '@rneui/themed'
 import { StatusBar } from 'expo-status-bar';
 
+import { UserContext } from '../context/Context'
 
 import * as React from 'react';
 import { HomeScreen } from '../components/HomeScreen';
+import { BottomMenu } from '../components/BottomMenu';
+import { Map } from '../components/Map';
 
 
 export default function MainApp({ session }) {
   const [loading, setLoading] = useState(true)
   const [fullName, setFullName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
+
+  const [appState, setAppState] = useState('home');
 
   useEffect(() => {
     if (session) getProfile()
@@ -48,23 +52,34 @@ export default function MainApp({ session }) {
   }
 
   return (
-    <View style={styles.container}>
-        <View style={styles.headerContainer}>
-            <Image 
-                    source={require("../assets/images/icon.png")}
-                    style={styles.logo}
-                    resizeMode='contain'
-                />
-            <Text style={styles.headingText}>Tickbox Traveller</Text>
+    <UserContext.Provider value={
+        { 
+            session,
+            currentAppState: [appState, setAppState],
+        }        
+    }>
+        <View style={styles.container}>
+            <View style={styles.headerContainer}>
+                <Image 
+                        source={require("../assets/images/icon.png")}
+                        style={styles.logo}
+                        resizeMode='contain'
+                    />
+                <Text style={styles.headingText}>Tickbox Traveller</Text>
+            </View>
+            <View style={styles.contentContainer}>
+                {appState == "record" ? 
+                    <HomeScreen session={session}/> :
+                    <Map />
+                }
+                
+            </View>
+            <View style={styles.footerContainer}>
+                <BottomMenu />
+            </View>
+            <StatusBar style="auto" />
         </View>
-        <View style={styles.contentContainer}>
-            <HomeScreen session={session}/>
-        </View>
-        <View style={styles.footerContainer}>
-
-        </View>
-        <StatusBar style="auto" />
-    </View>
+    </UserContext.Provider>
   )
 }
 

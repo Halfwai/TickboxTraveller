@@ -83,7 +83,6 @@ export function HomeScreen({session}) {
     }
 
     const sortAttractions = (attractionsList) => {
-        console.log(attractionsList)
         for(let i = 0; i < ticks.length; i++){
             attractionsList[ticks[i].attractionid - 1].ticked = true
         }
@@ -273,10 +272,10 @@ const TickBoxContainer = (props) => {
 
 const styles = StyleSheet.create({
     container: {
-      padding: 12,
+      paddingHorizontal: 12,
     },
     attractionsContainer: {
-        paddingVertical: 20
+        // paddingVertical: 20
     },
     tickBoxTextContainer: {
         flexDirection: "row",
