@@ -1,12 +1,14 @@
 import { StyleSheet, View, Alert, Image, Text, ScrollView, Pressable, Animated, LayoutAnimation, Platform, UIManager } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import { supabase } from '../lib/supabase'
 import * as Location from 'expo-location';
 import { getDistance, orderByDistance } from 'geolib';
 import Checkbox from 'expo-checkbox';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+
+import { UserContext } from '../context/Context';
 
 if (
     Platform.OS === 'android' &&
@@ -16,107 +18,16 @@ if (
 }
 
 
-export function HomeScreen({session}) {
-    const [ attractions, setAttractions ] = useState(null);
-    const [ location, setLocation ] = useState(null);
-    const [ ticks, setTicks] = useState(null);
-    const [ attractionsSorted, setAttractionsSorted ] = useState(false);
+export function HomeScreen() {
+    const { session, attractionsList } = useContext(UserContext);
+    const [ attractions ] = attractionsList;
 
 
-    useEffect(() => {
-        getLocationData();
-        getAttractionsData();
-        getTicksData();
-    }, []);
-
-    const getLocationData = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-            setErrorMsg('Permission to access location was denied');
-            return;
-        }    
-        let currentLocation = await Location.getCurrentPositionAsync({});
-
-        setLocation({
-            latitude: currentLocation.coords.latitude, 
-            longitude: currentLocation.coords.longitude
-        })
-    }
-
-    const getAttractionsData = async () => {
-        const { data, error } = await supabase
-            .from('attractions')
-            .select()
-            .order('id')
-        if(data){
-            try {
-                let attractionsList = Object.values(data);
-                setAttractions(attractionsList);
-            } catch (error) {
-                // Error saving data
-                console.log(`Error getting data: ${error}`)
-            }
-        }
-        if(error){
-            console.log(error);
-        }
-    }
-
-    const getTicksData = async () => {
-        const { data, error } = await supabase
-            .from('ticks')
-            .select()
-            .eq("user_id", session.user.id)
-
-        if(data){
-            try {
-                let ticksList = Object.values(data);
-                setTicks(ticksList)
-            } catch (error) {
-                // Error saving data
-                console.log(`Error getting data: ${error}`)
-            }
-        }
-        if (error){
-            console.log(error);
-        }
-    }
-
-    const sortAttractions = (attractionsList) => {
-        for(let i = 0; i < ticks.length; i++){
-            attractionsList[ticks[i].attractionid - 1].ticked = true
-        }
-
-
-        attractionsList = orderByDistance(location, attractionsList);
-        for (let i = 0; i < attractionsList.length; i++){
-            const attractionLocation = {
-                latitude: attractionsList[i].latitude,
-                longitude: attractionsList[i].longitude,
-            }
-            attractionsList[i].currentDistance = getDistance(location, attractionLocation);
-
-            // let ticked = false;
-            // for(let j = 0; j < ticks.length; j++){
-            //     if (attractionsList[i].id == ticks[j].attractionid){
-            //         ticked = true;
-            //     }
-            // }
-            // attractionsList[i].ticked = ticked;
-        }
-        return attractionsList
-    }
-
-    if (attractions == null || location == null || ticks == null){
-        return;
-    }
-
-    if(!attractionsSorted){
-        setAttractions(sortAttractions(attractions));
-        setAttractionsSorted(true);
-    }
-    
-
+    // session,
+    // currentAppState: [appState, setAppState],
+    // attractionsList: [attractions, setAttractions],
+    // ticksList: [ticks, setTicks],
+    // location
 
     // console.log(session);
 
@@ -180,7 +91,7 @@ const TickBoxContainer = (props) => {
         if(error){
             console.log(error)
         }
-
+        props.attraction.ticked = true;
 
     }
 
@@ -197,10 +108,7 @@ const TickBoxContainer = (props) => {
         if (error){
             console.log(error);
         }
-        
-
-
-
+        props.attraction.ticked = false;
     }
 
 
