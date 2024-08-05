@@ -3,26 +3,33 @@ import { supabase } from '../lib/supabase'
 import { StyleSheet, View, Alert, Image, Text } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 
-import { UserContext } from '../context/Context'
+import { UserContext, LocationContext } from '../context/Context'
 
 import * as React from 'react';
 import { HomeScreen } from '../components/HomeScreen';
 import { BottomMenu } from '../components/BottomMenu';
 import { Map } from '../components/Map';
+import { GetLocationBox } from '../components/GetLocationBox';
+import { Header } from '../components/Header';
+import { Home } from '../components/Home';
 
 import * as Location from 'expo-location';
 import { getDistance, orderByDistance } from 'geolib';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function MainApp({ session }) {
     const [loading, setLoading] = useState(true)
     const [fullName, setFullName] = useState('')
     const [avatarUrl, setAvatarUrl] = useState('')
+    const [userData, setUserData] = useState(null);
 
     const [appState, setAppState] = useState('home');
 
     const [ attractions, setAttractions ] = useState(null);
     const [ location, setLocation ] = useState(null);
+    const [ askForLocation, setAskForLocation ] = useState(false);
     const [ ticks, setTicks] = useState(null);
     const [ attractionsSorted, setAttractionsSorted ] = useState(false);
 
@@ -50,9 +57,7 @@ export default function MainApp({ session }) {
         }
 
         if (data) {
-            console.log(data);
-            setFullName(data.full_name)
-            setAvatarUrl(data.avatar_url)
+            setUserData(data)
         }
         } catch (error) {
             console.log(error)
@@ -69,10 +74,32 @@ export default function MainApp({ session }) {
     const getLocationData = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-            setErrorMsg('Permission to access location was denied');
-            return;
+            const storedLocationData = await checkLocationData()
+            if(storedLocationData == null){
+                setAskForLocation(true);
+                return (
+                    <LocationContext.Provider value={
+                        {
+                            setLocation,
+                            setAskForLocation
+                        }
+                    }>
+                        <GetLocationBox />
+                    </LocationContext.Provider>
+                )
+            }
+            else {
+                const locationData = JSON.parse(storedLocationData)
+                setLocation({
+                    latitude: locationData.latitude, 
+                    longitude: locationData.longitude
+                })
+                return;
+            }
+            
         }    
         let currentLocation = await Location.getCurrentPositionAsync({});
+
 
         setLocation({
             latitude: currentLocation.coords.latitude, 
@@ -130,24 +157,48 @@ export default function MainApp({ session }) {
                 latitude: attractionsList[i].latitude,
                 longitude: attractionsList[i].longitude,
             }
-            attractionsList[i].currentDistance = getDistance(location, attractionLocation);
+            attractionsList[i].currentDistance = (getDistance(location, attractionLocation) / 1000).toFixed(2);
         }
         return attractionsList
     }
 
-    if (attractions == null || location == null || ticks == null){
+    const checkLocationData = async() => {
+        try {
+            const value = await AsyncStorage.getItem('setLocation');
+            return value;
+        } catch (e) {
+        // error reading value
+            return false;
+        }
+    }
+
+
+    if(askForLocation){
+        return (
+            <LocationContext.Provider value={
+                {
+                    setLocation,
+                    setAskForLocation
+                }
+            }>
+                <GetLocationBox />
+            </LocationContext.Provider>
+        )
+    }
+
+        
+    if (!userData || !attractions || !ticks || !location){
         return;
     }
 
     if(!attractionsSorted){
+        if(location == null){
+            return
+        }
         setAttractions(sortAttractions(attractions));
         setAttractionsSorted(true);
     }
 
-
-    // const [ attractions, setAttractions ] = useState(null);
-    // const [ location, setLocation ] = useState(null);
-    // const [ ticks, setTicks] = useState(null);
     return (
         <UserContext.Provider value={
             { 
@@ -155,22 +206,23 @@ export default function MainApp({ session }) {
                 currentAppState: [appState, setAppState],
                 attractionsList: [attractions, setAttractions],
                 ticksList: [ticks, setTicks],
-                location
+                currentLocation: [location, setLocation],
+                userDataState: [userData, setUserData]
             }        
         }>
             <View style={styles.container}>
                 <View style={styles.headerContainer}>
-                    <Image 
-                            source={require("../assets/images/icon.png")}
-                            style={styles.logo}
-                            resizeMode='contain'
-                        />
-                    <Text style={styles.headingText}>Tickbox Traveller</Text>
+                    <Header />
                 </View>
                 <View style={styles.contentContainer}>
-                    {appState == "record" ? 
-                        <HomeScreen session={session}/> :
+                    {appState == "record" && 
+                        <HomeScreen />
+                    }
+                    {appState == "map" && 
                         <Map />
+                    }
+                    {appState == "home" &&
+                        <Home />
                     }
                     
                 </View>
@@ -192,10 +244,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 30,
         backgroundColor: "#1D4A7A",
-        flexDirection: "row",
         alignItems: "center",
-        // width: "100%",
-        // justifyContent: "space-between"
     },
     logo: {
         width: 100,

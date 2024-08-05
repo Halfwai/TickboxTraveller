@@ -1,16 +1,25 @@
-import React, { useContext }from 'react';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import React, { useContext, useState }from 'react';
+import MapView, { Marker, Callout, CalloutSubview } from 'react-native-maps';
 import { StyleSheet, View, Text, Button } from 'react-native';
 
 import { UserContext } from '../context/Context'
 
 
 import { TickBoxContainer } from './TickBoxContainer'
+import { CustomButton } from './GenericComponents';
 
 export function Map() {
-    const { session, location, attractionsList } = useContext(UserContext)
+    const { session, currentLocation, attractionsList } = useContext(UserContext)
+    const [location, setLocation] = currentLocation
+
+
     const attractions = attractionsList[0];
-    const iconImage = require(`../assets/mapIcons/nature.png`)
+    // const iconImage = require(`../assets/mapIcons/nature.png`)
+
+    const [ showAttractionBox, setShowAttractionBox ] = useState(false);
+    const [ attraction, setAttraction ] = useState(attractions[0]);
+
+
     return (
         <View style={styles.container}>
             <MapView style={styles.map} 
@@ -19,13 +28,13 @@ export function Map() {
                     longitude: location.longitude,
                     latitudeDelta: 1,
                     longitudeDelta: 1,
-                }}                
+                }}
+                onPress={(e) => {
+                    setShowAttractionBox(false);
+                }}             
             >
                 <Marker
                     coordinate={location}
-                    onPress={() => {
-                        console.log("here");
-                    }}
                 />
                 {attractions.map((attraction, i) => {
                     return (
@@ -49,20 +58,22 @@ export function Map() {
                             require(`../assets/mapIcons/history.png`) :
                             require(`../assets/mapIcons/shopping.png`)
                         }
+                        onPress={() => {
+                            setShowAttractionBox(true)
+                            setAttraction(attraction);
+                        }}
+                        // onCalloutPress={() => {
+
+                        // }}
                     > 
-                        <Callout>
-                            <TickBoxContainer 
-                                attraction={attraction}
-                                session={session}
-                                key={i}
-                            />
-                            <Button
-                                title="Test"
-                                onPress={() => {
-                                    console.log(attraction.name);
-                                }}
-                            />
-                       </Callout>
+                        {/* <Callout style={styles.callout}>
+                            <View style={styles.calloutContainer}>
+                                <Text>
+                                    {attraction.name}
+                                </Text>
+                            </View>
+
+                       </Callout> */}
                     </Marker>
                     )
 
@@ -73,18 +84,16 @@ export function Map() {
 
 
             </MapView>
+            {showAttractionBox &&
+                <View style={styles.detailsContainer}>
+                    <TickBoxContainer 
+                        attraction={attraction}
+                        session={session}
+                    />
+                </View>
+            }
         </View>
     );
-}
-
-const InfoBox = (props) => {
-    return (
-        <View>
-            <Text>
-                {props.attraction.name}
-            </Text>
-        </View>
-    )
 }
 
 const styles = StyleSheet.create({
@@ -98,5 +107,23 @@ const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: "white",
         position: "absolute"
+    },
+    callout:{
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    calloutContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%"
+    },
+    detailsContainer: {
+        position: "absolute",
+        backgroundColor: 'white',
+        width: "90%",
+        top: "25%",
+        left: "5%",
+        padding: 10,
+        borderRadius: 10
     }
 });

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TickboxTraveller",
-    "slug": "TickboxTraveller",
+    "slug": "tickboxtraveller",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,10 +19,22 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-    "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9b45ebbb-3eb1-4599-8ba4-2bce887e31dc"
+      }
+    },
+    "owner": "halfwai",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9b45ebbb-3eb1-4599-8ba4-2bce887e31dc"
     }
   }
 }

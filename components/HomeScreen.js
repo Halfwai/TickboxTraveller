@@ -25,14 +25,6 @@ export function HomeScreen() {
     const [ attractions ] = attractionsList;
 
 
-    // session,
-    // currentAppState: [appState, setAppState],
-    // attractionsList: [attractions, setAttractions],
-    // ticksList: [ticks, setTicks],
-    // location
-
-    // console.log(session);
-
     return (
         <View style={styles.container}>
             <View style={styles.attractionsContainer}>
@@ -41,7 +33,7 @@ export function HomeScreen() {
                         <TickBoxContainer 
                             attraction={attraction}
                             session={session}
-                            key={i}
+                            key={attraction.id}
                         />
                     ))}
                 </ScrollView>

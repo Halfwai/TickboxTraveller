@@ -30,6 +30,33 @@ export const SignUp = () => {
         }
 
         setLoading(true)
+        try {
+            const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
+
+            const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
+            console.log(fileExt);
+            const path = `${Date.now()}.${fileExt}`
+            console.log(path)
+            const { data, error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(path, arraybuffer)
+
+            if (uploadError) {
+                throw uploadError
+            }
+
+        } catch (error) {
+        if (error instanceof Error) {
+            Alert.alert(error.message)
+        } else {
+            throw error
+        }
+        } finally {
+        setUploading(false)
+        }
+
+
+
         const {
             data: { session },
             error,

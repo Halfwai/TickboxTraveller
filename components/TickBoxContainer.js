@@ -13,6 +13,9 @@ import { UserContext } from '../context/Context';
 
 
 export const TickBoxContainer = (props) => {
+    const { attractionsList } = useContext(UserContext);
+    const [ attractions, setAttractions ] = attractionsList;
+
     const [showDescription, setShowDescription] = useState(false);
     const [isChecked, setChecked] = useState(props.attraction.ticked);
     const [tickBoxDisabled, setTickBoxDisabled] = useState(false);
@@ -53,8 +56,8 @@ export const TickBoxContainer = (props) => {
         if(error){
             console.log(error)
         }
-        props.attraction.ticked = true;
 
+        setAttractions(updateAttractions(true));
     }
 
     async function removeTick(){
@@ -70,9 +73,22 @@ export const TickBoxContainer = (props) => {
         if (error){
             console.log(error);
         }
-        props.attraction.ticked = false;
+        setAttractions(updateAttractions(false));
     }
 
+    function updateAttractions(bool){
+        const updatedAttractions = attractions.map((attraction, i) => {
+            if(attraction.id == props.attraction.id){
+                return {
+                    ...attraction,
+                    ticked: bool
+                }
+            } else {
+                return attraction
+            }
+        })
+        return updatedAttractions;
+    }
 
     return (
         <View
@@ -80,8 +96,8 @@ export const TickBoxContainer = (props) => {
             style={styles.tickBoxContainer}
         >   
             <View style={styles.tickBoxTextContainer}>
-                <View style={styles.tickBoxWrap}>
-                <FontAwesome
+                <View style={styles.tickBoxHeadingContainer}>
+                    <FontAwesome
                         name={showDescription ? "caret-down" : "caret-right"}
                         style={styles.toggleIcon} 
                         onPress={ () => {
@@ -96,8 +112,8 @@ export const TickBoxContainer = (props) => {
                     />
                     <Text style={styles.tickBoxMainText}>{props.attraction.name}</Text>
                 </View>
-                <View style={styles.tickBoxWrap}>
-                    <Text>{`${props.attraction.currentDistance} meters away`}</Text>
+                <View style={styles.tickBoxDistanceContainer}>
+                    <Text>{`${props.attraction.currentDistance} Km away`}</Text>
                 </View>                
             </View>
             {showDescription && (
@@ -154,10 +170,15 @@ const styles = StyleSheet.create({
         borderBottomColor: "#51A6F5",
         borderBottomWidth: 1
     },
-    tickBoxWrap: {
-        width: "45%",
+    tickBoxHeadingContainer: {
         alignItems: "center",
-        flexDirection: "row"
+        flexDirection: "row",
+        width: "60%"
+    },
+    tickBoxDistanceContainer: {
+        alignItems: "flex-end",
+        justifyContent: "center",
+        width: "40%"
     },
     tickBoxMainText: {
         fontSize: 18,
