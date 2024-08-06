@@ -12,6 +12,9 @@ import { Map } from '../components/Map';
 import { GetLocationBox } from '../components/GetLocationBox';
 import { Header } from '../components/Header';
 import { Home } from '../components/Home';
+import { Profile } from '../components/profile';
+
+import { getProfile } from '../helperFunctions/getProfile';
 
 import * as Location from 'expo-location';
 import { getDistance, orderByDistance } from 'geolib';
@@ -22,7 +25,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function MainApp({ session }) {
     const [loading, setLoading] = useState(true)
     const [fullName, setFullName] = useState('')
-    const [avatarUrl, setAvatarUrl] = useState('')
+    const [avatarUrl, setAvatarUrl] = useState(null)
     const [userData, setUserData] = useState(null);
 
     const [appState, setAppState] = useState('home');
@@ -33,41 +36,50 @@ export default function MainApp({ session }) {
     const [ ticks, setTicks] = useState(null);
     const [ attractionsSorted, setAttractionsSorted ] = useState(false);
 
+    const [ profileId, setProfileId] = useState(null);
+
     useEffect(() => {
         if (session) {
-            getProfile()
+            try {
+                getProfile(setUserData, session?.user.id)
+            } catch(e){
+                console.log(e);
+            }
+            
         }
         getLocationData();
         getAttractionsData();
         getTicksData();
     }, [session])
 
-    async function getProfile() {
-        try {
-        setLoading(true)
-        if (!session?.user) throw new Error('No user on the session!')
 
-        const { data, error, status } = await supabase
-            .from('profiles')
-            .select(`username, avatar_url`)
-            .eq('id', session?.user.id)
-            .single()
-        if (error && status !== 406) {
-            throw error
-        }
 
-        if (data) {
-            setUserData(data)
-        }
-        } catch (error) {
-            console.log(error)
-        if (error instanceof Error) {
-            Alert.alert(error.message)
-        }
-        } finally {
-        setLoading(false)
-        }
-    }
+    // async function getProfile() {
+    //     try {
+    //     setLoading(true)
+    //     if (!session?.user) throw new Error('No user on the session!')
+
+    //     const { data, error, status } = await supabase
+    //         .from('profiles')
+    //         .select()
+    //         .eq('id', session?.user.id)
+    //         .single()
+    //     if (error && status !== 406) {
+    //         throw error
+    //     }
+
+    //     if (data) {
+    //         setUserData(data)
+    //     }
+    //     } catch (error) {
+    //         console.log(error)
+    //     if (error instanceof Error) {
+    //         Alert.alert(error.message)
+    //     }
+    //     } finally {
+    //     setLoading(false)
+    //     }
+    // }
 
 
 
@@ -207,7 +219,9 @@ export default function MainApp({ session }) {
                 attractionsList: [attractions, setAttractions],
                 ticksList: [ticks, setTicks],
                 currentLocation: [location, setLocation],
-                userDataState: [userData, setUserData]
+                userDataState: [userData, setUserData],
+                avatarState: [avatarUrl, setAvatarUrl],
+                profileIdState: [ profileId, setProfileId]
             }        
         }>
             <View style={styles.container}>
@@ -223,6 +237,11 @@ export default function MainApp({ session }) {
                     }
                     {appState == "home" &&
                         <Home />
+                    }
+                    {appState == "profile" &&
+                        <Profile 
+                            id={profileId}
+                        />
                     }
                     
                 </View>
