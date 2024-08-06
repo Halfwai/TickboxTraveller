@@ -149,11 +149,9 @@ export const TickBoxContainer = (props) => {
 
                     />
                 </Pressable>
-            </View>
-            
+            </View>            
         </View>
     )
-
 }
 
 const styles = StyleSheet.create({

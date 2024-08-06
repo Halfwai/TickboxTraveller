@@ -56,10 +56,10 @@ export function BottomMenu(){
             <MenuButton 
                 icon={'check-square-o'}
                 action={() => (
-                    setAppState('record')
+                    setAppState('log ticks')
                 )}
-                text={'Record'}
-                highlighted={appState == "record"}
+                text={'Log Ticks'}
+                highlighted={appState == "log ticks"}
             />
         </View>
     )

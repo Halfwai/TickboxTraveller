@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { UserContext, LocationContext } from '../context/Context'
 
 import * as React from 'react';
-import { HomeScreen } from '../components/HomeScreen';
+import { HomeScreen } from './LogScreen';
 import { BottomMenu } from '../components/BottomMenu';
 import { Map } from '../components/Map';
 import { GetLocationBox } from '../components/GetLocationBox';

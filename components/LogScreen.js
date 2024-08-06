@@ -20,7 +20,7 @@ if (
 }
 
 
-export function HomeScreen() {
+export function LogScreen() {
     const { session, attractionsList } = useContext(UserContext);
     const [ attractions ] = attractionsList;
 

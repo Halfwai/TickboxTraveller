@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { UserContext, LocationContext } from '../context/Context'
 
 import * as React from 'react';
-import { HomeScreen } from '../components/HomeScreen';
+import { LogScreen } from '../components/LogScreen';
 import { BottomMenu } from '../components/BottomMenu';
 import { Map } from '../components/Map';
 import { GetLocationBox } from '../components/GetLocationBox';
@@ -41,19 +41,19 @@ export default function MainApp({ session }) {
     useEffect(() => {
         if (session) {
             try {
-                getProfile(setUserData, session?.user.id)
+                getProfile(setUserData, session?.user.id);
+                getTicksData(setTicks, session.user.id);
             } catch(e){
                 console.log(e);
             }
             
         }
         getLocationData();
-        getAttractionsData();
-        getTicksData();
+        getAttractionsData();        
     }, [session])
 
 
-
+    
     // async function getProfile() {
     //     try {
     //     setLoading(true)
@@ -203,6 +203,8 @@ export default function MainApp({ session }) {
         return;
     }
 
+
+
     if(!attractionsSorted){
         if(location == null){
             return
@@ -229,8 +231,8 @@ export default function MainApp({ session }) {
                     <Header />
                 </View>
                 <View style={styles.contentContainer}>
-                    {appState == "record" && 
-                        <HomeScreen />
+                    {appState == "log ticks" && 
+                        <LogScreen />
                     }
                     {appState == "map" && 
                         <Map />
