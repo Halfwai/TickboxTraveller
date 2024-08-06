@@ -30,11 +30,11 @@ export const SignUp = () => {
         }
 
         setLoading(true)
+        let imagePath = ""
         try {
             const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
 
             const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
-            console.log(fileExt);
             const path = `${Date.now()}.${fileExt}`
             console.log(path)
             const { data, error: uploadError } = await supabase.storage
@@ -43,6 +43,10 @@ export const SignUp = () => {
 
             if (uploadError) {
                 throw uploadError
+            }
+            
+            if(data){
+                imagePath = data.path;
             }
 
         } catch (error) {
@@ -66,7 +70,7 @@ export const SignUp = () => {
             options: {
                 data: {
                     username: userName,
-                    avatar_url: image != null ? image.uri : ""
+                    avatar_url: imagePath != null ? imagePath : ""
                 }
             },
         })

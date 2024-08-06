@@ -24,12 +24,13 @@ export const Header = () => {
     const [avatarUrl, setAvatarUrl] = useState(null);
 
     useEffect(() => {
+            console.log(userData.avatar_url)
         if (userData.avatar_url) downloadImage(userData.avatar_url)
     }, [userData.avatar_url])
     
     async function downloadImage(path) {
         try {
-            const { data, error } = await supabase.storage.from('avatars').download("https://vcfkoseroqnlaopeldln.supabase.co/storage/v1/object/sign/avatars/1722870119372.jpeg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJhdmF0YXJzLzE3MjI4NzAxMTkzNzIuanBlZyIsImlhdCI6MTcyMjg3MjAxNSwiZXhwIjoxNzIzNDc2ODE1fQ.xsNGOKWLQ0IjV2jAlD_-nKMpF41UEg-_2PKOtxYMba8&t=2024-08-05T15%3A33%3A35.418Z")    
+            const { data, error } = await supabase.storage.from('avatars').download(path)    
         if (error) {
             throw error
         }
