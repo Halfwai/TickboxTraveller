@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { StyleSheet, View, Alert, Image, Text } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
@@ -30,10 +30,10 @@ export default function MainApp({ session }) {
 
     const [appState, setAppState] = useState('home');
 
-    const [ attractions, setAttractions ] = useState(null);
+    const [ attractions, setAttractions ] = useState([]);
     const [ location, setLocation ] = useState(null);
     const [ askForLocation, setAskForLocation ] = useState(false);
-    const [ ticks, setTicks] = useState(null);
+    const [ ticks, setTicks] = useState([]);
     const [ attractionsSorted, setAttractionsSorted ] = useState(false);
 
     const [ profileId, setProfileId] = useState(null);
@@ -158,7 +158,7 @@ export default function MainApp({ session }) {
         }
     }
 
-    const sortAttractions = (attractionsList) => {
+    const sortAttractions = (attractionsList, ticks) => {
         for(let i = 0; i < ticks.length; i++){
             attractionsList[ticks[i].attractionid - 1].ticked = true
         }
@@ -198,18 +198,17 @@ export default function MainApp({ session }) {
         )
     }
 
+
         
     if (!userData || !attractions || !ticks || !location){
         return;
     }
 
-
-
     if(!attractionsSorted){
         if(location == null){
             return
         }
-        setAttractions(sortAttractions(attractions));
+        
         setAttractionsSorted(true);
     }
 

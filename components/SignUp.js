@@ -1,7 +1,7 @@
 import React, { useState, useContext  } from 'react'
 import { Alert, StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
 import { supabase } from '../lib/supabase'
-import { Button, Input } from '@rneui/themed'
+import { Input } from '@rneui/themed'
 import * as ImagePicker from 'expo-image-picker'
 
 import { AuthContext } from '../context/Context'

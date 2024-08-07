@@ -1,4 +1,4 @@
-import { StyleSheet, View, Alert, Image, Text, ScrollView, Pressable, Animated, LayoutAnimation, Platform, UIManager } from 'react-native'
+import { StyleSheet, View, Alert, Image, Text, ScrollView, Pressable, Animated, LayoutAnimation, Modal } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import { supabase } from '../lib/supabase'
@@ -6,9 +6,12 @@ import * as Location from 'expo-location';
 import { getDistance, orderByDistance } from 'geolib';
 import Checkbox from 'expo-checkbox';
 
+
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { UserContext } from '../context/Context';
+import { GoTrueAdminApi } from '@supabase/supabase-js';
+import { ConfirmTickBox } from './ConfirmTickBox';
 
 
 
@@ -19,6 +22,8 @@ export const TickBoxContainer = (props) => {
     const [showDescription, setShowDescription] = useState(false);
     const [isChecked, setChecked] = useState(props.attraction.ticked);
     const [tickBoxDisabled, setTickBoxDisabled] = useState(false);
+
+    const [showModel, setShowModel] = useState(false);
 
     const splashOpacity = useRef(new Animated.Value(0)).current;
     const animateSplash = () => {
@@ -42,6 +47,7 @@ export const TickBoxContainer = (props) => {
             ]
         ).start(() => {
             setTickBoxDisabled(false);
+            setShowModel(true)
         });
     }
 
@@ -134,10 +140,12 @@ export const TickBoxContainer = (props) => {
                 <Pressable
                     onPress={() => {
                         if(!isChecked){
-                            insertTick();
+                            // insertTick();
                             animateSplash();
+                            // setShowModel(true)
                         } else {
-                            removeTick();
+                            // removeTick();
+                            setShowModel(false)
                         }
                         setChecked(!isChecked);
                     }}
@@ -149,7 +157,25 @@ export const TickBoxContainer = (props) => {
 
                     />
                 </Pressable>
-            </View>            
+            </View>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showModel}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setShowModel(false)                    
+                }}>
+                <View style={styles.modelContainer}>
+                    <ConfirmTickBox 
+                        attraction={props.attraction}
+                        user={props.user}
+                        hide={() => {
+                            setShowModel(false)
+                        }}
+                    />
+                </View>               
+            </Modal>
         </View>
     )
 }
@@ -220,5 +246,14 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 10,
         backgroundColor: "lightgray"
+    },
+    modelContainer: {
+        height: "100%", 
+        width: "100%", 
+        justifyContent: "center", 
+        alignItems: "center",
+    },
+    modalView: {
+        backgroundColor: "white"
     }
 })

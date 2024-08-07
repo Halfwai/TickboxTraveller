@@ -11,6 +11,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { UserContext } from '../context/Context';
 
 import { TickBoxContainer } from './TickBoxContainer'
+import { ConfirmTickBox } from './ConfirmTickBox';
 
 if (
     Platform.OS === 'android' &&
