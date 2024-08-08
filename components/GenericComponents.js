@@ -21,11 +21,12 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
-        padding: 5
+        padding: 5,
     },
     customButtonText: {
         color: "white",
         fontWeight: "bold",
-        fontSize: 15
+        fontSize: 15,
+        textAlign: "center"
     }
 })

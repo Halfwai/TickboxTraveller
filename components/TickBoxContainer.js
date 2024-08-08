@@ -12,8 +12,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { UserContext } from '../context/Context';
 import { GoTrueAdminApi } from '@supabase/supabase-js';
 import { ConfirmTickBox } from './ConfirmTickBox';
-
-
+import { CancelTickBox } from './CancelTickBox';
 
 export const TickBoxContainer = (props) => {
     const { attractionsList } = useContext(UserContext);
@@ -23,7 +22,8 @@ export const TickBoxContainer = (props) => {
     const [isChecked, setChecked] = useState(props.attraction.ticked);
     const [tickBoxDisabled, setTickBoxDisabled] = useState(false);
 
-    const [showModel, setShowModel] = useState(false);
+    const [showConfirmModel, setShowConfirmModel] = useState(false);
+    const [showCancelModel, setShowCancelModel] = useState(false);
 
     const splashOpacity = useRef(new Animated.Value(0)).current;
     const animateSplash = () => {
@@ -47,14 +47,14 @@ export const TickBoxContainer = (props) => {
             ]
         ).start(() => {
             setTickBoxDisabled(false);
-            setShowModel(true)
+            setShowConfirmModel(true)
         });
     }
 
-    async function insertTick(){
+    async function insertTick(imageUrl, comment){
         const { data, error } = await supabase
             .from('ticks')
-            .insert({ user_id: props.session.user.id, attractionid: props.attraction.id })
+            .insert({ user_id: props.session.user.id, attractionid: props.attraction.id, comment: comment })
             .select()
         if(data){
             console.log("tick inserted")
@@ -62,7 +62,6 @@ export const TickBoxContainer = (props) => {
         if(error){
             console.log(error)
         }
-
         setAttractions(updateAttractions(true));
     }
 
@@ -138,43 +137,68 @@ export const TickBoxContainer = (props) => {
                     style={[styles.tickBoxAnimation, {opacity: splashOpacity}]}
                 />  
                 <Pressable
-                    onPress={() => {
+                    onPress={() => {            
                         if(!isChecked){
-                            // insertTick();
+                            setChecked(!isChecked);
                             animateSplash();
-                            // setShowModel(true)
                         } else {
-                            // removeTick();
-                            setShowModel(false)
+                            setShowCancelModel(true)
                         }
-                        setChecked(!isChecked);
+                        
                     }}
                     disabled={tickBoxDisabled}
                 >
                     <Image 
                         source={isChecked ? require("../assets/images/tickedBox.png") : require("../assets/images/unTickedBox.png")} 
                         style={styles.tickBox}
-
                     />
                 </Pressable>
             </View>
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={showModel}
+                visible={showConfirmModel}
                 onRequestClose={() => {
                     Alert.alert('Modal has been closed.');
-                    setShowModel(false)                    
+                    setShowConfirmModel(false)                    
                 }}>
                 <View style={styles.modelContainer}>
                     <ConfirmTickBox 
                         attraction={props.attraction}
-                        user={props.user}
+                        add={isChecked}
                         hide={() => {
-                            setShowModel(false)
+                            setShowConfirmModel(false)
+                        }}
+                        removeTick={() => {
+                            setChecked(false)
+                        }}
+                        insertTick={(imageUrl, comment) => {
+                            insertTick(imageUrl, comment);
+                        }}
+                        deleteTick={() => {
+                            removeTick();
                         }}
                     />
                 </View>               
+            </Modal>
+            <Modal 
+                animationType="slide"
+                transparent={true}
+                visible={showCancelModel}
+            >
+                <View style={styles.modelContainer}>
+                    <CancelTickBox 
+                        attraction={props.attraction}
+                        add={isChecked}
+                        hide={() => {
+                            setShowCancelModel(false)
+                        }}
+                        removeTick={() => {
+                            removeTick()
+                            setChecked(false)
+                        }}
+                    />
+                </View>
             </Modal>
         </View>
     )

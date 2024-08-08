@@ -33,7 +33,7 @@ export default function MainApp({ session }) {
     const [ attractions, setAttractions ] = useState([]);
     const [ location, setLocation ] = useState(null);
     const [ askForLocation, setAskForLocation ] = useState(false);
-    const [ ticks, setTicks] = useState([]);
+    const [ ticks, setTicks] = useState(null);
     const [ attractionsSorted, setAttractionsSorted ] = useState(false);
 
     const [ profileId, setProfileId] = useState(null);
@@ -205,10 +205,7 @@ export default function MainApp({ session }) {
     }
 
     if(!attractionsSorted){
-        if(location == null){
-            return
-        }
-        
+        sortAttractions(attractions, ticks)        
         setAttractionsSorted(true);
     }
 

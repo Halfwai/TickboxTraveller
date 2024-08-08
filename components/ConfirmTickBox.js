@@ -26,8 +26,6 @@ export const ConfirmTickBox = (props) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [uploading, setUploading] = useState(false);
 
-
-    console.log(imageUrl);
     return (
         <View 
             {...props}
@@ -38,7 +36,6 @@ export const ConfirmTickBox = (props) => {
                     <Image 
                         source={require("../assets/images/fireworks.gif")}
                         style={styles.gif}
-                        
                     />
                 </View>
             }
@@ -47,25 +44,23 @@ export const ConfirmTickBox = (props) => {
                 <Text>{`for ticking off ${props.attraction.name}`}</Text>
             </View>
             <Input
-                leftIcon={{ type: 'font-awesome', name: 'comment', color: 'white' }}
+                leftIcon={ commentText == "" && { type: 'font-awesome', name: 'comment', color: 'white' }}
                 onChangeText={(text) => setCommentText(text)}
                 value={commentText}
                 placeholder="Leave a comment"
-                // autoCapitalize={'none'}
                 style={styles.input}
                 selectionColor={"black"}
                 containerStyle={{
-                    padding: 0,
-                    marginTop: 20,                    
+                    marginBottom: 0
                 }}
                 inputContainerStyle={{
-                    padding: 5,
+                    paddingHorizontal: 10,
                     margin: 0,
                     borderBottomWidth: 0,
                     backgroundColor: "lightgray",
                     borderRadius: 10
-
                 }}
+                multiline
             />
             <View style={styles.imageContainer}>
                 { imageUrl &&             
@@ -76,28 +71,31 @@ export const ConfirmTickBox = (props) => {
                     />            
                 }
                 <CustomButton 
-                    action={() => 
+                    action={() => {
                         uploadImage(setImageUrl, setUploading)
-                    }
+                    }}
                     text={uploading ? 'Uploading ...' : 'Upload a picture'}
-                    style={{width: "60%"}}
+                    // style={{width: "90%"}}
                 />
             </View>
-
-
-
-
-            
-            
-            <TouchableOpacity
-                onPress={() => {
-                    props.hide()
-                }}
-            >
-               
-                <Text>Test</Text>
-            </TouchableOpacity>
-            
+            <View style={styles.buttonContainer}>
+                <CustomButton 
+                    action={() => {
+                        props.removeTick()
+                        props.hide()
+                    }}
+                    text={"Cancel Tick"}
+                    style={{width: "45%"}}
+                />
+                <CustomButton 
+                    action={() => {
+                        props.insertTick(imageUrl, commentText);
+                        props.hide()
+                    }}
+                    text={"Confirm Tick"}
+                    style={{width: "45%"}}
+                />
+            </View>            
         </View>
     )
 } 
@@ -106,21 +104,22 @@ const styles = StyleSheet.create({
     container: {
         position: "absolute",
         width: "90%",
-        // height: "50%",
-        // top: "50%",
         backgroundColor: "white",
         borderWidth: 2,
         borderColor: "#51A6F5",
         borderRadius: 10
     },
     gifContainer: {
-        top: -200,
+        top: -50,
         position: "absolute",
         width: "100%",
-        alignItems: "center"
+        alignItems: "center",
+        zIndex: 1,
+        pointerEvents: "none"
     },
     headingContainer: {
         alignItems: "center",
+        marginBottom: 20
 
     },
     congratText: {
@@ -129,9 +128,15 @@ const styles = StyleSheet.create({
     }, 
     imageContainer: {
         alignItems: "center",
-        justifyContent: "center"    
+        justifyContent: "center",
+        padding: 10
     },
     image: {
         
+    },
+    buttonContainer: {
+        flexDirection: "row",
+        padding: 10,
+        justifyContent: "space-between"
     }
 })

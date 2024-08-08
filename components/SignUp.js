@@ -56,7 +56,8 @@ export const SignUp = () => {
             throw error
         }
         } finally {
-        setUploading(false)
+            setUploading(false)
+            return imagePath;
         }
 
 
