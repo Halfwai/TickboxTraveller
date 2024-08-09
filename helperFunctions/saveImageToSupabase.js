@@ -1,34 +1,37 @@
-export const saveImageToSupabase = async (setLoading) => {
-    setLoading(true)
-        let imagePath = ""
-        try {
-            const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
+import { supabase } from '../lib/supabase'
 
-            const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
-            const path = `${Date.now()}.${fileExt}`
-            console.log(path)
-            const { data, error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(path, arraybuffer)
+export const saveImageToSupabase = async (image, bucket) => {
+    if(!image){
+        return null;
+    }
+    let imagePath = ""
+    try {
+        const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
 
-            if (uploadError) {
-                throw uploadError
-            }
-            
-            if(data){
-                imagePath = data.path;
-            }
+        const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
+        const path = `${Date.now()}.${fileExt}`
+        const { data, error: uploadError } = await supabase.storage
+            .from(bucket)
+            .upload(path, arraybuffer)
 
-        } catch (error) {
-        if (error instanceof Error) {
-            Alert.alert(error.message)
-        } else {
-            throw error
+        if (uploadError) {
+            throw uploadError
         }
-        } finally {
-            setUploading(false)
-            return imagePath;
+        
+        if(data){
+            imagePath = data.path;
+            return imagePath
         }
+    } catch (error) {
+        console.log(error);
+        // if (error instanceof Error) {
+        //     Alert.alert(error.message)
+        // } else {
+        //     throw error
+        // }
+    } finally {
+        console.log(imagePath)        
+    }
 }
 
 

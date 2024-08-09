@@ -159,6 +159,7 @@ export default function MainApp({ session }) {
     }
 
     const sortAttractions = (attractionsList, ticks) => {
+        console.log(ticks)
         for(let i = 0; i < ticks.length; i++){
             attractionsList[ticks[i].attractionid - 1].ticked = true
         }

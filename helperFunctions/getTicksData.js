@@ -3,8 +3,28 @@ import { supabase } from '../lib/supabase'
 export const getTicksData = async (setTicks, id) => {
     const { data, error } = await supabase
         .from('ticks')
-        .select()
-        .eq("user_id", id)
+        .select(
+            `
+            comment,
+            image_url,
+            updated_at,
+            id,
+            ...profiles!inner(
+            full_name,
+            avatar_url
+            ),
+            ...attractions!inner(
+            name,
+            id
+            )
+            `,
+        )
+        .eq(
+            'user_id',
+            id,
+        )
+        .order('updated_at')
+
 
     if(data){
         try {

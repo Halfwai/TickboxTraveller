@@ -18,7 +18,7 @@ export const SignUp = () => {
     const [hidePassword, setHidePassword] = useState(true);
     const [hideConfirmationPassword, setHideConfirmationPassword] = useState(true);
 
-    const [userName, setUserName] = useState('');
+    const [fullName, setFullName] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [image, setImage] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -57,20 +57,17 @@ export const SignUp = () => {
         }
         } finally {
             setUploading(false)
-            return imagePath;
         }
 
-
-
         const {
-            data: { session },
+            data,
             error,
         } = await supabase.auth.signUp({
             email: email,
             password: password,
             options: {
                 data: {
-                    username: userName,
+                    full_name: fullName,
                     avatar_url: imagePath != null ? imagePath : ""
                 }
             },
@@ -82,7 +79,11 @@ export const SignUp = () => {
             } else {
                 Alert.alert(error.message)
             }            
-        } 
+        }
+
+        if (data){
+            
+        }
         // if (!session) Alert.alert('Please check your inbox for email verification!')
         setLoading(false)
 
@@ -121,7 +122,7 @@ export const SignUp = () => {
     }
 
     const validateInput = () => {
-        if (userName == ''){
+        if (fullName == ''){
             Alert.alert('Please input user name');
             return false;
         }
@@ -152,9 +153,9 @@ export const SignUp = () => {
                 <View style={styles.inputContainer}>
                     <Input
                         leftIcon={{ type: 'font-awesome', name: 'envelope', color: 'lightgray' }}
-                        onChangeText={(text) => setUserName(text)}
-                        value={userName}
-                        placeholder="User Name"
+                        onChangeText={(text) => setFullName(text)}
+                        value={fullName}
+                        placeholder="Full Name"
                         autoCapitalize={'none'}
                         style={styles.input}
                         selectionColor={"white"}

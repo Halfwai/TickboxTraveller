@@ -16,6 +16,7 @@ import { Input } from '@rneui/themed'
 
 import { uploadImage } from '../helperFunctions/uploadImage';
 
+
 export const ConfirmTickBox = (props) => {
     const [showFireWorks, setShowFireWorks] = useState(true);
     setTimeout(() => {

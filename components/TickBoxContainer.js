@@ -13,6 +13,9 @@ import { UserContext } from '../context/Context';
 import { GoTrueAdminApi } from '@supabase/supabase-js';
 import { ConfirmTickBox } from './ConfirmTickBox';
 import { CancelTickBox } from './CancelTickBox';
+import { removeImage } from '../helperFunctions/removeImage';
+
+import { saveImageToSupabase } from '../helperFunctions/saveImageToSupabase';
 
 export const TickBoxContainer = (props) => {
     const { attractionsList } = useContext(UserContext);
@@ -51,10 +54,11 @@ export const TickBoxContainer = (props) => {
         });
     }
 
-    async function insertTick(imageUrl, comment){
+    async function insertTick(imageUrl, comment){        
+        const imagePath = await saveImageToSupabase(imageUrl, 'tickImages')
         const { data, error } = await supabase
             .from('ticks')
-            .insert({ user_id: props.session.user.id, attractionid: props.attraction.id, comment: comment })
+            .insert({ attractionid: props.attraction.id, comment: comment, image_url: imagePath ? imagePath : null })
             .select()
         if(data){
             console.log("tick inserted")
@@ -74,6 +78,8 @@ export const TickBoxContainer = (props) => {
             .select()        
         if (data){
             console.log(data);
+            removeImage(data[0].image_url, "tickImages");
+            
         }
         if (error){
             console.log(error);
