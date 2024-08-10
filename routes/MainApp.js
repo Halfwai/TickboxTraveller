@@ -13,6 +13,7 @@ import { GetLocationBox } from '../components/GetLocationBox';
 import { Header } from '../components/Header';
 import { Home } from '../components/Home';
 import { Profile } from '../components/profile';
+import { Search } from '../components/Search';
 
 import { getProfile } from '../helperFunctions/getProfile';
 
@@ -30,7 +31,7 @@ export default function MainApp({ session }) {
 
     const [appState, setAppState] = useState('home');
 
-    const [ attractions, setAttractions ] = useState([]);
+    const [ attractions, setAttractions ] = useState(null);
     const [ location, setLocation ] = useState(null);
     const [ askForLocation, setAskForLocation ] = useState(false);
     const [ ticks, setTicks] = useState(null);
@@ -42,47 +43,21 @@ export default function MainApp({ session }) {
         if (session) {
             try {
                 getProfile(setUserData, session?.user.id);
+                getLocationData();
+                getAttractionsData();
                 getTicksData(setTicks, session.user.id);
             } catch(e){
                 console.log(e);
-            }
-            
+            }            
         }
-        getLocationData();
-        getAttractionsData();        
     }, [session])
 
-
-    
-    // async function getProfile() {
-    //     try {
-    //     setLoading(true)
-    //     if (!session?.user) throw new Error('No user on the session!')
-
-    //     const { data, error, status } = await supabase
-    //         .from('profiles')
-    //         .select()
-    //         .eq('id', session?.user.id)
-    //         .single()
-    //     if (error && status !== 406) {
-    //         throw error
-    //     }
-
-    //     if (data) {
-    //         setUserData(data)
-    //     }
-    //     } catch (error) {
-    //         console.log(error)
-    //     if (error instanceof Error) {
-    //         Alert.alert(error.message)
-    //     }
-    //     } finally {
-    //     setLoading(false)
-    //     }
+    // if (!userData || !attractions || !ticks || !location){
+    //     return;
     // }
 
 
-
+    
     const getLocationData = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
@@ -158,22 +133,7 @@ export default function MainApp({ session }) {
         }
     }
 
-    const sortAttractions = (attractionsList, ticks) => {
-        console.log(ticks)
-        for(let i = 0; i < ticks.length; i++){
-            attractionsList[ticks[i].attractionid - 1].ticked = true
-        }
 
-        attractionsList = orderByDistance(location, attractionsList);
-        for (let i = 0; i < attractionsList.length; i++){
-            const attractionLocation = {
-                latitude: attractionsList[i].latitude,
-                longitude: attractionsList[i].longitude,
-            }
-            attractionsList[i].currentDistance = (getDistance(location, attractionLocation) / 1000).toFixed(2);
-        }
-        return attractionsList
-    }
 
     const checkLocationData = async() => {
         try {
@@ -206,9 +166,11 @@ export default function MainApp({ session }) {
     }
 
     if(!attractionsSorted){
-        sortAttractions(attractions, ticks)        
+        setAttractions(sortAttractions(attractions, ticks, location))
         setAttractionsSorted(true);
     }
+
+    
 
     return (
         <UserContext.Provider value={
@@ -241,6 +203,9 @@ export default function MainApp({ session }) {
                         <Profile 
                             id={profileId}
                         />
+                    }
+                    {appState == "search" &&
+                        <Search />
                     }
                     
                 </View>
@@ -279,3 +244,19 @@ const styles = StyleSheet.create({
         flex: 1
     }
 })
+
+const sortAttractions = (attractionsList, ticks, location) => {
+    let sortedAttractionsList = [...attractionsList];
+    for(let i = 0; i < ticks.length; i++){
+        sortedAttractionsList[ticks[i].attractionid - 1].ticked = true
+    }
+    sortedAttractionsList = orderByDistance(location, sortedAttractionsList);
+    for (let i = 0; i < sortedAttractionsList.length; i++){
+        const attractionLocation = {
+            latitude: sortedAttractionsList[i].latitude,
+            longitude: sortedAttractionsList[i].longitude,
+        }
+        sortedAttractionsList[i].currentDistance = (getDistance(location, attractionLocation) / 1000).toFixed(2);
+    }
+    return sortedAttractionsList
+}

@@ -24,8 +24,6 @@ if (
 export function LogScreen() {
     const { session, attractionsList } = useContext(UserContext);
     const [ attractions ] = attractionsList;
-
-
     return (
         <View style={styles.container}>
             <View style={styles.attractionsContainer}>

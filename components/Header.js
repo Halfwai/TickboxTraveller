@@ -16,7 +16,7 @@ import { getDistance, orderByDistance } from 'geolib';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { downloadImage } from '../helperFunctions/downLoadImage';
+import { getImageUrl } from '../helperFunctions/getImageUrl';
 
 export const Header = () => {
     const { userDataState, currentAppState, avatarState, profileIdState, session } = useContext(UserContext);
@@ -27,7 +27,7 @@ export const Header = () => {
     const [profileId, setProfileId] = profileIdState;
 
     useEffect(() => {
-        if (userData.avatar_url) downloadImage(setAvatarUrl, userData.avatar_url)
+        if (userData.avatar_url) getImageUrl(setAvatarUrl, userData.avatar_url, "avatars")
     }, [userData.avatar_url])
     
     updateProfileId = async () => {

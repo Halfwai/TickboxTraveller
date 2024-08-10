@@ -4,9 +4,8 @@ import { useState, useEffect, useContext } from 'react'
 import { TickView } from "./TickView";
 
 import { getProfile } from '../helperFunctions/getProfile';
-import { downloadImage } from "../helperFunctions/downLoadImage";
 import { getTicksData } from "../helperFunctions/getTicksData";
-
+import { getImageUrl } from "../helperFunctions/getImageUrl";
 
 
 
@@ -27,7 +26,7 @@ export const Profile = (props) => {
             getProfile(setProfileData, props.id)
             getTicksData(setTicksData, props.id);
         } else {
-            downloadImage(setAvatarUrl, profileData.avatar_url) 
+            getImageUrl(setAvatarUrl, profileData.avatar_url, "avatars") 
             
         }           
     }, [profileData])
@@ -64,11 +63,14 @@ export const Profile = (props) => {
             </ScrollView> */}
 
         { ticksData &&
-            <FlatList
-                data={ticksData}
-                renderItem={tickView}
-                keyExtractor={(item) => item.id}
-            />
+                <FlatList
+                    nestedScrollEnabled
+                    data={ticksData}
+                    renderItem={item => <TickView tick={item} />}
+                    keyExtractor={(item) => item.id}
+                />
+
+
 
         }
 
@@ -79,12 +81,19 @@ export const Profile = (props) => {
     )
 }
 
+
+const TextComponent = ({item}) => {
+    const [foo, setFoo] = useState("bar");
+    return <Text>{foo}</Text>;
+  }
+
 const styles = StyleSheet.create({
     container: {
         // paddingVertical: 20
+        flex: 1
     },
     profileImage: {
-        height: 200,
+        height: 100,
         width: "50%",
     },
     userContainer: {
@@ -93,7 +102,7 @@ const styles = StyleSheet.create({
         width: "100%",
         borderBottomWidth: 1,
         borderBottomColor: "#51A6F5",
-        paddingVertical: 10
+        paddingVertical: 10,
     },
     usernameContainer: {
         width: "45%",
@@ -103,12 +112,5 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: "center"
     }, 
-    tickInfoContainer: {
 
-    },
-    tickProfileImage: {
-        height: 50,
-        width: 50,
-        backgroundColor: "black"
-    }
 })

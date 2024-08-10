@@ -61,6 +61,14 @@ export function BottomMenu(){
                 text={'Log Ticks'}
                 highlighted={appState == "log ticks"}
             />
+            <MenuButton 
+                icon={'search'}
+                action={() => (
+                    setAppState('search')
+                )}
+                text={'Search'}
+                highlighted={appState == "search"}
+            />
         </View>
     )
 }

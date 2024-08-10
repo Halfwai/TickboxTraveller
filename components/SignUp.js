@@ -68,12 +68,14 @@ export const SignUp = () => {
             options: {
                 data: {
                     full_name: fullName,
-                    avatar_url: imagePath != null ? imagePath : ""
+                    avatar_url: imagePath != null ? imagePath : "",
+                    email: email
                 }
             },
         })
 
         if (error){
+            console.log(error);
             if (error.message === "Database error saving new user"){
                 Alert.alert("User name already in use. Please try different user name")
             } else {
