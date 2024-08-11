@@ -1,14 +1,15 @@
 import { supabase } from '../lib/supabase'
 
-export const getUserData = async (setUserData, searchType, searchString) => {
+export const getUserData = async (setUserData, searchType, searchString, userId) => {
+    console.log(userId)
     const { data, error } = await supabase
-        .from('profiles')
-        .select()
+        .rpc('get_user_data', { user_id: userId})
         .like(searchType, `%${searchString}%`)
-    if(error){
-        console.log(error)
-    }
+
     if (data){
-        setUserData(data);
+        setUserData(data)
+    }
+    if (error){
+        console.log(error)
     }
 } 

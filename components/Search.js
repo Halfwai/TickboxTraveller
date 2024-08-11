@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useContext } from 'react'
 import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert, Image, Text, TextInput } from 'react-native'
+import { StyleSheet, View, Alert, Image, Text, TextInput, FlatList } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 import RadioGroup from 'react-native-radio-buttons-group';
 
@@ -8,6 +8,13 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { Input } from '@rneui/themed'
 import { getUserData } from '../helperFunctions/getUserData';
+import { getImageUrl } from "../helperFunctions/getImageUrl";
+
+import { UserView } from './UserView';
+
+import { UserContext } from '../context/Context'
+
+import { insertFollow } from '../helperFunctions/insertFollow';
 
 export const Search = () => {
     const radioButtons = useMemo(() => ([
@@ -21,14 +28,18 @@ export const Search = () => {
         }
     ]), []);
 
-    const [selectedId, setSelectedId] = useState(1);
+    const { session } = useContext(UserContext)
+
+
+    const [selectedId, setSelectedId] = useState('full_name');
     const [searchText, setSearchText] = useState("")
     const [userData, setUserData] = useState(null);
 
     useEffect(() => {
-        getUserData(setUserData, selectedId, searchText);
+        getUserData(setUserData, selectedId, searchText, session.user.id);
     }, [searchText])
 
+    console.log(userData);
     return (
         <View>
             <View style={styles.headingContainer}>
@@ -54,13 +65,36 @@ export const Search = () => {
                 />
             </View>
             <View style={styles.searchResultsContainer}>
-                { 
-                    userData.map((user) => {
-                        return(
-                            <Text>{user.full_name}</Text>
-                        )                    
-                    })
+                { userData &&
+                    <FlatList
+                        nestedScrollEnabled
+                        data={userData}
+                        renderItem={user => 
+                            <UserView
+                                user={user}
+                                action={() => {
+                                    console.log("here")
+                                }}
+                                key={user.id}
+                                sessionId={session.user.id}
+                                
+                            />
+                        }
+                    />
+
                 }
+
+
+
+                {/* { userData &&
+                    userData.map((user) => {
+                        if (user.id != session.user.id){
+                            return (
+                                   
+                            )  
+                        }
+                    })
+                } */}
             </View>
         </View>
     )
