@@ -1,20 +1,5 @@
-import { StyleSheet, View, Alert, Image, Text, TouchableOpacity } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect, useRef, useContext } from 'react'
-import { supabase } from '../lib/supabase'
-import * as Location from 'expo-location';
-import { getDistance, orderByDistance } from 'geolib';
-import Checkbox from 'expo-checkbox';
-
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-
-import { UserContext } from '../context/Context';
-
+import { StyleSheet, View, Text } from 'react-native'
 import { CustomButton } from './GenericComponents';
-
-import { Input } from '@rneui/themed'
-
-import { uploadImage } from '../helperFunctions/uploadImage';
 
 export const CancelTickBox = (props) => {
     return (

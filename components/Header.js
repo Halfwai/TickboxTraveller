@@ -1,35 +1,17 @@
-import { useState, useEffect, useContext } from 'react'
-import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert, Image, Text, TouchableOpacity } from 'react-native'
-import { StatusBar } from 'expo-status-bar';
+import { useState, useEffect, useContext, useRef } from 'react'
+import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
 
-import { UserContext, LocationContext } from '../context/Context'
+import { UserContext } from '../context/Context'
 
 import * as React from 'react';
-import { HomeScreen } from './LogScreen';
-import { BottomMenu } from '../components/BottomMenu';
-import { Map } from '../components/Map';
-import { GetLocationBox } from '../components/GetLocationBox';
 
-import * as Location from 'expo-location';
-import { getDistance, orderByDistance } from 'geolib';
+import { getImageUrl } from '../helperFunctions/supabaseFunctions';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import { getImageUrl } from '../helperFunctions/getImageUrl';
-
-export const Header = () => {
-    const { userDataState, currentAppState, avatarState, profileIdState, session } = useContext(UserContext);
-    const [userData] = userDataState;
+export const Header = (props) => {
+    const { currentAppState, currentProfileId, session } = useContext(UserContext);
     const [appState, setAppState] = currentAppState;
+    const [profileId, setProfileId] =  currentProfileId;
 
-    const [avatarUrl, setAvatarUrl] = avatarState;
-    const [profileId, setProfileId] = profileIdState;
-
-    useEffect(() => {
-        if (userData.avatar_url) getImageUrl(setAvatarUrl, userData.avatar_url, "avatars")
-    }, [userData.avatar_url])
-    
     updateProfileId = async () => {
         setProfileId(session?.user.id);
         setAppState("profile")
@@ -53,7 +35,7 @@ export const Header = () => {
                 }}
             >
                 <Image 
-                    source={{ uri: avatarUrl }}
+                    source={{ uri: props.profileImage }}
                     style={styles.userImage}
                     resizeMode='contain'
                 />

@@ -1,8 +1,7 @@
-import { StyleSheet, View, Alert, Image, Text, TouchableOpacity } from 'react-native'
-import { getImageUrl } from "../helperFunctions/getImageUrl";
-import { useState, useEffect, useContext, useMemo } from 'react'
+import { StyleSheet, View, Image, Text, Dimensions } from 'react-native'
+import { useState, useEffect, useMemo } from 'react'
 
-
+import ImageModal from 'react-native-image-modal'
 
 export const TickView = ({tick}) => {
     let formatTime = () => {
@@ -15,27 +14,27 @@ export const TickView = ({tick}) => {
           }).format(date)
         return currentDate
     }
-
     let tickData = tick.item;
-    const [avatarUrl, setAvatarUrl] = useState(null);
-    const [imageUrl, setImageUrl] = useState(null);
-    useEffect(() => {
-        getImageUrl(setAvatarUrl, tickData.avatar_url, "avatars")
-        getImageUrl(setImageUrl, tickData.image_url, "tickImages");
-    }, [])
-
     const date = useMemo(() => {
         return formatTime()
     })
 
-    console.log(tickData.image_url)
+    const windowWidth = Dimensions.get('window').width;
+
     return (
         <View style={styles.tickInfoContainer}>
             <View style={styles.topContainer}>
-                <Image 
-                    style={styles.tickProfileImage}
-                    source={{uri: avatarUrl}}
-                />
+                <View style={styles.avatarContainer}>
+                    { tickData.avatar_url ?
+                        <Image
+                            style={styles.tickProfileImage}
+                            source={{uri: tickData.avatar_url}}
+                        /> :
+                        <Text style={styles.imageReplacementText}>
+                            {tickData.full_name[0]}
+                        </Text>
+                    }  
+                </View>
                 <View style={{flexShrink: 1}}>
                     <Text style={styles.tickText}>
                         {`${tickData.full_name} `}
@@ -50,10 +49,12 @@ export const TickView = ({tick}) => {
             </View>
             <View style={styles.imageCommentContainer}>
                 { tickData.image_url &&
-                    <Image 
-                        source={{uri: imageUrl}}
-                        style={styles.tickImage}
+                    <ImageModal 
+                        source={{uri: tickData.image_url}}
+                        style={[styles.tickImage, {width: windowWidth - 20}]}
                         resizeMode='contain'
+                        animationDuration={300}
+                        // resizeMethod='resize'
                     />
                 }
                 { tickData.comment &&
@@ -63,7 +64,6 @@ export const TickView = ({tick}) => {
                         </Text>
                     </View>
                 }
-
             </View>
         </View>
         
@@ -82,12 +82,25 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingVertical: 10
     },
+    avatarContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        height: 52,
+        width: 52,
+        marginRight: 10,
+        backgroundColor: "black",
+        borderRadius: 25,
+        borderWidth: 2,
+        borderColor: "#51A6F5"
+    },
     tickProfileImage: {
         height: 50,
         width: 50,
-        backgroundColor: "black",
-        borderRadius: 25,
-        marginRight: 10,
+        borderRadius: 25,                   
+    },
+    imageReplacementText: {
+        color: "white",
+        fontSize: 30
     },
     tickText: {
         flexWrap: "wrap"
@@ -97,7 +110,6 @@ const styles = StyleSheet.create({
         fontStyle: "italic"
     },
     tickImage: {
-        width: "100%",
         height: 250,
         borderRadius: 10,
         overflow: "hidden",
@@ -105,7 +117,6 @@ const styles = StyleSheet.create({
     }, 
     commentBox: {        
         padding: 20,
-
     },
     imageCommentContainer: {
         // borderRadius: 10,

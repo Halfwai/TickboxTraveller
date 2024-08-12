@@ -1,21 +1,13 @@
-import { StyleSheet, View, Alert, Image, Text, ScrollView, Pressable, Animated, LayoutAnimation, Modal } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect, useRef, useContext } from 'react'
+import { StyleSheet, View, Alert, Image, Text, Pressable, Animated, LayoutAnimation, Modal } from 'react-native'
+import React, { useState, useRef, useContext } from 'react'
 import { supabase } from '../lib/supabase'
-import * as Location from 'expo-location';
-import { getDistance, orderByDistance } from 'geolib';
-import Checkbox from 'expo-checkbox';
-
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { UserContext } from '../context/Context';
-import { GoTrueAdminApi } from '@supabase/supabase-js';
 import { ConfirmTickBox } from './ConfirmTickBox';
 import { CancelTickBox } from './CancelTickBox';
-import { removeImage } from '../helperFunctions/removeImage';
-
-import { saveImageToSupabase } from '../helperFunctions/saveImageToSupabase';
+import { removeImage, saveImageToSupabase } from '../helperFunctions/supabaseFunctions';
 
 export const TickBoxContainer = (props) => {
     const { attractionsList } = useContext(UserContext);
@@ -58,7 +50,7 @@ export const TickBoxContainer = (props) => {
         const imagePath = await saveImageToSupabase(imageUrl, 'tickImages')
         const { data, error } = await supabase
             .from('ticks')
-            .insert({ attractionid: props.attraction.id, comment: comment, image_url: imagePath ? imagePath : null })
+            .insert({ attraction_id: props.attraction.id, comment: comment, image_url: imagePath ? imagePath : null })
             .select()
         if(data){
             console.log("tick inserted")
@@ -74,12 +66,12 @@ export const TickBoxContainer = (props) => {
             .from('ticks')
             .delete()
             .eq("user_id", props.session.user.id)
-            .eq("attractionid", props.attraction.id)
+            .eq("attraction_id", props.attraction.id)
             .select()        
         if (data){
-            console.log(data);
-            removeImage(data[0].image_url, "tickImages");
-            
+            if(data[0].image_url){
+                removeImage(data[0].image_url, "tickImages");    
+            }                    
         }
         if (error){
             console.log(error);
@@ -116,8 +108,7 @@ export const TickBoxContainer = (props) => {
                                 LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                             } else {
                                 LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
-                            }
-                            
+                            }                            
                             setShowDescription(!showDescription);
                         }}
                     />

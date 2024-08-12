@@ -1,82 +1,66 @@
-import { StyleSheet, View, Text, TouchableOpacity, Button, Image, ScrollView, FlatList } from "react-native";
-import { supabase } from '../lib/supabase'
+import { StyleSheet, View, Text, Image, FlatList } from "react-native";
 import { useState, useEffect, useContext } from 'react'
 import { TickView } from "./TickView";
 
-import { getProfile } from '../helperFunctions/getProfile';
-import { getTicksData } from "../helperFunctions/getTicksData";
-import { getImageUrl } from "../helperFunctions/getImageUrl";
-
-
+import { getProfile, getTicksData, getImageUrl } from '../helperFunctions/supabaseFunctions';
 
 import { UserContext } from '../context/Context'
 
-export const Profile = (props) => {
-    const { userDataState, currentAppState, avatarState } = useContext(UserContext);
-    const [userData] = userDataState;
-    const [appState, setAppState] = currentAppState;
+export const Profile = () => {
     const [ticksData, setTicksData] = useState(null);
-
     const [avatarUrl, setAvatarUrl] = useState(null);
-
     const [profileData, setProfileData] = useState(null);
+
+    const { currentProfileId } = useContext(UserContext)
+    const [ profileId ] = currentProfileId;
 
     useEffect(() => {
         if(profileData == null){
-            getProfile(setProfileData, props.id)
-            getTicksData(setTicksData, props.id);
+            getProfile(setProfileData, profileId )
+            getTicksData(setTicksData, profileId );
         } else {
             getImageUrl(setAvatarUrl, profileData.avatar_url, "avatars") 
             
         }           
     }, [profileData])
 
-    if(!profileData || !ticksData){
-        return;
-    }
-
-
-
     return(
         <View style={styles.container}>
-            <View style={styles.userContainer}>
-                <Image
-                    source={{ uri: avatarUrl }}
-                    style={styles.profileImage}
-                    resizeMode={"contain"}
-                /> 
-                <View style={styles.usernameContainer}>
-                    <Text style={styles.usernameText}>
-                        {profileData.full_name}
-                    </Text>
-                    <Text>
-                        {`${ticksData.length} boxes ticked`}
-                    </Text>
+            { profileData && 
+                <View style={styles.userContainer}>
+                    <View style={styles.avatarContainer}>
+                        { profileData.avatar_url ?
+                            <Image
+                                source={{ uri: profileData.avatar_url }}
+                                style={styles.profileImage}
+                                resizeMode={"contain"}
+                            /> :
+                            <Text style={styles.avatarLetter}>{profileData.full_name[0]}</Text>
+                        }                        
+                    </View>
+                    <View style={styles.usernameContainer}>
+                        <Text style={styles.usernameText}>
+                            {profileData.full_name}
+                        </Text>
+                        { ticksData && 
+                            <Text>
+                                { ticksData.length == 1 ?
+                                    `${ticksData.length} box ticked` :
+                                    `${ticksData.length} boxes ticked`
+                                }
+                            </Text>
+                        }
+                    </View>
                 </View>
-            </View>
-            {/* <ScrollView>
-                {ticksData.map((tick) => {
-                    return (
-                        <Text>{tick.full_name}</Text>
-                    )                    
-                })}
-            </ScrollView> */}
-
-        { ticksData &&
+            }
+            { ticksData &&
                 <FlatList
                     nestedScrollEnabled
                     data={ticksData}
                     renderItem={item => <TickView tick={item} />}
                     keyExtractor={(item) => item.id}
                 />
-
-
-
-        }
-
-
-
-
+            }
         </View>
     )
 }
@@ -92,9 +76,17 @@ const styles = StyleSheet.create({
         // paddingVertical: 20
         flex: 1
     },
+    avatarContainer:{
+        height: 100,
+        width: 100,
+        borderRadius: 25,
+        backgroundColor: "black",
+        alignItems: "center",
+        justifyContent: "center"
+    },
     profileImage: {
         height: 100,
-        width: "50%",
+        width: 100,
     },
     userContainer: {
         flexDirection: "row",
@@ -102,7 +94,11 @@ const styles = StyleSheet.create({
         width: "100%",
         borderBottomWidth: 1,
         borderBottomColor: "#51A6F5",
-        paddingVertical: 10,
+        padding: 10,
+    },
+    avatarLetter:{
+        color: "white",
+        fontSize: 50
     },
     usernameContainer: {
         width: "45%",

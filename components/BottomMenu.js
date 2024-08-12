@@ -1,16 +1,18 @@
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 
 import { UserContext } from '../context/Context'
-import React, { useState, useContext  } from 'react'
+import React, { useContext  } from 'react'
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
+import { updateAppState } from "../helperFunctions/generalFunctions";
+
 export function BottomMenu(){
-    const { currentAppState } = useContext(UserContext);
+    const { currentAppState, currentNavigationMap } = useContext(UserContext);
     const [appState, setAppState] = currentAppState
+    const [navigationMap, setNavigationMap] = currentNavigationMap
 
     const MenuButton = (props) => {
-
         return (
             <View 
                 style={styles.buttonContainer}
@@ -40,7 +42,7 @@ export function BottomMenu(){
             <MenuButton 
                 icon={'home'}
                 action={() => (
-                    setAppState('home')
+                    updateAppState('home', appState, setAppState, navigationMap, setNavigationMap)
                 )}
                 text={'Home'}
                 highlighted={appState == "home"}
@@ -48,7 +50,7 @@ export function BottomMenu(){
             <MenuButton 
                 icon={'map'}
                 action={() => (
-                    setAppState('map')
+                    updateAppState('map', appState, setAppState, navigationMap, setNavigationMap)
                 )}
                 text={'Map'}
                 highlighted={appState == "map"}
@@ -56,7 +58,7 @@ export function BottomMenu(){
             <MenuButton 
                 icon={'check-square-o'}
                 action={() => (
-                    setAppState('log ticks')
+                    updateAppState('log ticks', appState, setAppState, navigationMap, setNavigationMap)
                 )}
                 text={'Log Ticks'}
                 highlighted={appState == "log ticks"}
@@ -64,7 +66,7 @@ export function BottomMenu(){
             <MenuButton 
                 icon={'search'}
                 action={() => (
-                    setAppState('search')
+                    updateAppState('search', appState, setAppState, navigationMap, setNavigationMap)
                 )}
                 text={'Search'}
                 highlighted={appState == "search"}

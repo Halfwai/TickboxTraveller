@@ -1,20 +1,15 @@
 import { useState, useEffect, useMemo, useContext } from 'react'
-import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert, Image, Text, TextInput, FlatList } from 'react-native'
-import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, View, TextInput, FlatList } from 'react-native'
 import RadioGroup from 'react-native-radio-buttons-group';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import { Input } from '@rneui/themed'
-import { getUserData } from '../helperFunctions/getUserData';
-import { getImageUrl } from "../helperFunctions/getImageUrl";
+import { getUserData } from '../helperFunctions/supabaseFunctions';
+import { updateAppState } from '../helperFunctions/generalFunctions';
 
 import { UserView } from './UserView';
 
 import { UserContext } from '../context/Context'
-
-import { insertFollow } from '../helperFunctions/insertFollow';
 
 export const Search = () => {
     const radioButtons = useMemo(() => ([
@@ -28,7 +23,11 @@ export const Search = () => {
         }
     ]), []);
 
-    const { session } = useContext(UserContext)
+    const { session, currentProfileId, currentAppState, currentNavigationMap } = useContext(UserContext)
+    const [ profileId, setProfileId ] = currentProfileId;
+    const [ appState, setAppState ] = currentAppState;
+    const [ navigationMap, setNavigationMap ] = currentNavigationMap;
+    
 
 
     const [selectedId, setSelectedId] = useState('full_name');
@@ -39,7 +38,6 @@ export const Search = () => {
         getUserData(setUserData, selectedId, searchText, session.user.id);
     }, [searchText])
 
-    console.log(userData);
     return (
         <View>
             <View style={styles.headingContainer}>
@@ -73,7 +71,8 @@ export const Search = () => {
                             <UserView
                                 user={user}
                                 action={() => {
-                                    console.log("here")
+                                    setProfileId(user.item.id);
+                                    updateAppState("profile", appState, setAppState, navigationMap, setNavigationMap)
                                 }}
                                 key={user.id}
                                 sessionId={session.user.id}

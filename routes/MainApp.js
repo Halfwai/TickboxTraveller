@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert, Image, Text } from 'react-native'
+import { StyleSheet, View, Alert, Image, Text, BackHandler } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 
 import { UserContext, LocationContext } from '../context/Context'
@@ -15,17 +15,16 @@ import { Home } from '../components/Home';
 import { Profile } from '../components/profile';
 import { Search } from '../components/Search';
 
-import { getProfile } from '../helperFunctions/getProfile';
+import { getProfile, getAttractionsData } from '../helperFunctions/supabaseFunctions';
+import { sortAttractions, handleBackAction, getLocationData } from '../helperFunctions/generalFunctions';
 
 import * as Location from 'expo-location';
-import { getDistance, orderByDistance } from 'geolib';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 
 export default function MainApp({ session }) {
-    const [loading, setLoading] = useState(true)
-    const [fullName, setFullName] = useState('')
     const [avatarUrl, setAvatarUrl] = useState(null)
     const [userData, setUserData] = useState(null);
 
@@ -36,115 +35,30 @@ export default function MainApp({ session }) {
     const [ askForLocation, setAskForLocation ] = useState(false);
     const [ ticks, setTicks] = useState(null);
     const [ attractionsSorted, setAttractionsSorted ] = useState(false);
-
+    const [ navigationMap, setNavigationMap ] = useState([])
     const [ profileId, setProfileId] = useState(null);
 
     useEffect(() => {
         if (session) {
             try {
                 getProfile(setUserData, session?.user.id);
-                getLocationData();
-                getAttractionsData();
-                getTicksData(setTicks, session.user.id);
+                getLocationData(setLocation, setAskForLocation);
+                getAttractionsData(session.user.id, setAttractions);
             } catch(e){
                 console.log(e);
             }            
         }
     }, [session])
 
-    // if (!userData || !attractions || !ticks || !location){
-    //     return;
-    // }
-
-
-    
-    const getLocationData = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-            const storedLocationData = await checkLocationData()
-            if(storedLocationData == null){
-                setAskForLocation(true);
-                return (
-                    <LocationContext.Provider value={
-                        {
-                            setLocation,
-                            setAskForLocation
-                        }
-                    }>
-                        <GetLocationBox />
-                    </LocationContext.Provider>
-                )
-            }
-            else {
-                const locationData = JSON.parse(storedLocationData)
-                setLocation({
-                    latitude: locationData.latitude, 
-                    longitude: locationData.longitude
-                })
-                return;
-            }
-            
-        }    
-        let currentLocation = await Location.getCurrentPositionAsync({});
-
-
-        setLocation({
-            latitude: currentLocation.coords.latitude, 
-            longitude: currentLocation.coords.longitude
-        })
-    }
-
-    const getAttractionsData = async () => {
-        const { data, error } = await supabase
-            .from('attractions')
-            .select()
-            .order('id')
-        if(data){
-            try {
-                let attractionsList = Object.values(data);
-                setAttractions(attractionsList);
-            } catch (error) {
-                // Error saving data
-                console.log(`Error getting data: ${error}`)
-            }
-        }
-        if(error){
-            console.log(error);
-        }
-    }
-
-    const getTicksData = async () => {
-        const { data, error } = await supabase
-            .from('ticks')
-            .select()
-            .eq("user_id", session.user.id)
-
-        if(data){
-            try {
-                let ticksList = Object.values(data);
-                setTicks(ticksList)
-            } catch (error) {
-                // Error saving data
-                console.log(`Error getting data: ${error}`)
-            }
-        }
-        if (error){
-            console.log(error);
-        }
-    }
-
-
-
-    const checkLocationData = async() => {
-        try {
-            const value = await AsyncStorage.getItem('setLocation');
-            return value;
-        } catch (e) {
-        // error reading value
-            return false;
-        }
-    }
-
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            () => {
+                return handleBackAction(navigationMap, setAppState, setNavigationMap)
+            },
+        );    
+        return () => backHandler.remove();
+    }, [navigationMap]);
 
     if(askForLocation){
         return (
@@ -158,45 +72,44 @@ export default function MainApp({ session }) {
             </LocationContext.Provider>
         )
     }
-
-
-        
-    if (!userData || !attractions || !ticks || !location){
+            
+    if (!userData || !attractions || !location){
         return;
     }
 
     if(!attractionsSorted){
-        setAttractions(sortAttractions(attractions, ticks, location))
+        setAttractions(sortAttractions(attractions, location))
         setAttractionsSorted(true);
     }
-
-    
 
     return (
         <UserContext.Provider value={
             { 
                 session,
+                currentNavigationMap: [navigationMap, setNavigationMap],
                 currentAppState: [appState, setAppState],
                 attractionsList: [attractions, setAttractions],
                 ticksList: [ticks, setTicks],
                 currentLocation: [location, setLocation],
                 userDataState: [userData, setUserData],
                 avatarState: [avatarUrl, setAvatarUrl],
-                profileIdState: [ profileId, setProfileId]
+                currentProfileId: [ profileId, setProfileId]
             }        
         }>
             <View style={styles.container}>
                 <View style={styles.headerContainer}>
-                    <Header />
+                    <Header 
+                        profileImage={userData.avatar_url}
+                    />
                 </View>
                 <View style={styles.contentContainer}>
-                    {appState == "log ticks" && 
+                     {appState == "log ticks" && 
                         <LogScreen />
                     }
                     {appState == "map" && 
                         <Map />
                     }
-                    {appState == "home" &&
+                    {appState == "home" && 
                         <Home />
                     }
                     {appState == "profile" &&
@@ -206,8 +119,7 @@ export default function MainApp({ session }) {
                     }
                     {appState == "search" &&
                         <Search />
-                    }
-                    
+                    } 
                 </View>
                 <View style={styles.footerContainer}>
                     <BottomMenu />
@@ -244,19 +156,3 @@ const styles = StyleSheet.create({
         flex: 1
     }
 })
-
-const sortAttractions = (attractionsList, ticks, location) => {
-    let sortedAttractionsList = [...attractionsList];
-    for(let i = 0; i < ticks.length; i++){
-        sortedAttractionsList[ticks[i].attractionid - 1].ticked = true
-    }
-    sortedAttractionsList = orderByDistance(location, sortedAttractionsList);
-    for (let i = 0; i < sortedAttractionsList.length; i++){
-        const attractionLocation = {
-            latitude: sortedAttractionsList[i].latitude,
-            longitude: sortedAttractionsList[i].longitude,
-        }
-        sortedAttractionsList[i].currentDistance = (getDistance(location, attractionLocation) / 1000).toFixed(2);
-    }
-    return sortedAttractionsList
-}

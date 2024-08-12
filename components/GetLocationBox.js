@@ -1,5 +1,5 @@
-import { StyleSheet, View, Alert, Image, Text, ScrollView, Pressable, Animated, LayoutAnimation, Platform, UIManager } from 'react-native'
-import { useState, useEffect, useContext } from 'react'
+import { StyleSheet, View, Alert, Text } from 'react-native'
+import { useState, useContext } from 'react'
 
 import { LocationContext } from '../context/Context'
 

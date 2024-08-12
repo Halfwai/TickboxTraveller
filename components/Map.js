@@ -1,12 +1,10 @@
 import React, { useContext, useState }from 'react';
-import MapView, { Marker, Callout, CalloutSubview } from 'react-native-maps';
-import { StyleSheet, View, Text, Button } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { StyleSheet, View } from 'react-native';
 
 import { UserContext } from '../context/Context'
 
-
 import { TickBoxContainer } from './TickBoxContainer'
-import { CustomButton } from './GenericComponents';
 
 export function Map() {
     const { session, currentLocation, attractionsList } = useContext(UserContext)

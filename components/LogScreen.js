@@ -1,17 +1,9 @@
 import { StyleSheet, View, Alert, Image, Text, ScrollView, Pressable, Animated, LayoutAnimation, Platform, UIManager } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect, useRef, useContext } from 'react'
-import { supabase } from '../lib/supabase'
-import * as Location from 'expo-location';
-import { getDistance, orderByDistance } from 'geolib';
-import Checkbox from 'expo-checkbox';
-
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import React, { useContext } from 'react'
 
 import { UserContext } from '../context/Context';
 
 import { TickBoxContainer } from './TickBoxContainer'
-import { ConfirmTickBox } from './ConfirmTickBox';
 
 if (
     Platform.OS === 'android' &&

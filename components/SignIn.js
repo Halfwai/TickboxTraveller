@@ -1,7 +1,7 @@
-import React, { useState, createContext, useContext  } from 'react'
-import { Alert, StyleSheet, View, AppState, Image, Text } from 'react-native'
+import React, { useState, useContext  } from 'react'
+import { Alert, StyleSheet, View,  Image, Text } from 'react-native'
 import { supabase } from '../lib/supabase'
-import { Button, Input } from '@rneui/themed'
+import { Input } from '@rneui/themed'
 
 import { AuthContext } from '../context/Context'
 import { CustomButton } from './GenericComponents'
