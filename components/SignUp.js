@@ -7,6 +7,8 @@ import * as ImagePicker from 'expo-image-picker'
 import { AuthContext } from '../context/Context'
 import { CustomButton } from './GenericComponents'
 
+import { saveImageToSupabase } from '../helperFunctions/supabaseFunctions'
+
 
 
 export const SignUp = () => {
@@ -30,35 +32,8 @@ export const SignUp = () => {
         }
 
         setLoading(true)
-        let imagePath = ""
-        try {
-            const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer())
-
-            const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg'
-            const path = `${Date.now()}.${fileExt}`
-            console.log(path)
-            const { data, error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(path, arraybuffer)
-
-            if (uploadError) {
-                throw uploadError
-            }
-            
-            if(data){
-                imagePath = data.path;
-            }
-
-        } catch (error) {
-        if (error instanceof Error) {
-            Alert.alert(error.message)
-        } else {
-            throw error
-        }
-        } finally {
-            setUploading(false)
-        }
-
+        let imagePath = await saveImageToSupabase(image, "avatars")
+        
         const {
             data,
             error,

@@ -1,17 +1,9 @@
-import { StyleSheet, View, Alert, Image, Text, ScrollView, Pressable, Animated, LayoutAnimation, Platform, UIManager } from 'react-native'
+import { StyleSheet, View, ScrollView, FlatList } from 'react-native'
 import React, { useContext } from 'react'
 
 import { UserContext } from '../context/Context';
 
 import { TickBoxContainer } from './TickBoxContainer'
-
-if (
-    Platform.OS === 'android' &&
-    UIManager.setLayoutAnimationEnabledExperimental
-) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
 
 export function LogScreen() {
     const { session, attractionsList } = useContext(UserContext);
@@ -19,15 +11,17 @@ export function LogScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.attractionsContainer}>
-                <ScrollView>
-                    {attractions.map((attraction, i) => (
+                <FlatList 
+                    nestedScrollEnabled
+                    data={attractions}
+                    renderItem={attraction => 
                         <TickBoxContainer 
                             attraction={attraction}
                             session={session}
                             key={attraction.id}
                         />
-                    ))}
-                </ScrollView>
+                    }
+                />
             </View>
         </View>
     );
@@ -39,7 +33,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: 12,
     },
     attractionsContainer: {
-        // paddingVertical: 20
+
     },
     tickBoxTextContainer: {
         flexDirection: "row",

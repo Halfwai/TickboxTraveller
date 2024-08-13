@@ -8,7 +8,6 @@ import { UserContext } from '../context/Context'
 
 export const Profile = () => {
     const [ticksData, setTicksData] = useState(null);
-    const [avatarUrl, setAvatarUrl] = useState(null);
     const [profileData, setProfileData] = useState(null);
 
     const { currentProfileId } = useContext(UserContext)
@@ -18,9 +17,6 @@ export const Profile = () => {
         if(profileData == null){
             getProfile(setProfileData, profileId )
             getTicksData(setTicksData, profileId );
-        } else {
-            getImageUrl(setAvatarUrl, profileData.avatar_url, "avatars") 
-            
         }           
     }, [profileData])
 
@@ -87,6 +83,7 @@ const styles = StyleSheet.create({
     profileImage: {
         height: 100,
         width: 100,
+        borderRadius: 25,
     },
     userContainer: {
         flexDirection: "row",

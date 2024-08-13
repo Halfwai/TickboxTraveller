@@ -2,21 +2,17 @@ import { useState, useEffect, useContext, useRef } from 'react'
 import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
 
 import { UserContext } from '../context/Context'
+import { updateAppState } from '../helperFunctions/generalFunctions';
 
 import * as React from 'react';
 
-import { getImageUrl } from '../helperFunctions/supabaseFunctions';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export const Header = (props) => {
-    const { currentAppState, currentProfileId, session } = useContext(UserContext);
+    const { currentAppState, currentProfileId, session, currentNavigationMap } = useContext(UserContext);
     const [appState, setAppState] = currentAppState;
     const [profileId, setProfileId] =  currentProfileId;
-
-    updateProfileId = async () => {
-        setProfileId(session?.user.id);
-        setAppState("profile")
-    }
-
+    const [navigationMap, setNavigationMap] = currentNavigationMap
 
     return (
         <View style={styles.headerContainer}>
@@ -28,22 +24,30 @@ export const Header = (props) => {
                 />
                 <Text style={styles.stateText}>{appState}</Text>
             </View>
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity>
+                    <FontAwesome 
+                        name="cog" 
+                        style={styles.settingsIcon}
+                        onPress={() => {
+                            updateAppState("settings", appState, setAppState, navigationMap, setNavigationMap)
+                        }}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => {
+                        setProfileId(session?.user.id);
+                        updateAppState("profile", appState, setAppState, navigationMap, setNavigationMap)
+                    }}
+                >
+                    <Image 
+                        source={{ uri: props.profileImage }}
+                        style={styles.userImage}
+                        resizeMode='contain'
+                    />
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                onPress={() => {
-                    updateProfileId() 
-                }}
-            >
-                <Image 
-                    source={{ uri: props.profileImage }}
-                    style={styles.userImage}
-                    resizeMode='contain'
-                />
-            </TouchableOpacity>
-
-
-
-            {/* <Text style={styles.headingText}>Tickbox Traveller</Text> */}
+            </View>
         </View>
     )
 }
@@ -70,11 +74,12 @@ const styles = StyleSheet.create({
     },
     stateText: {
         textTransform: "capitalize",
-        fontSize: 25,
-        fontWeight: "bold"
+        fontSize: 22,
+        fontWeight: "bold",
     },
-    headingText: {
-        fontSize: 30,
+    buttonContainer:{
+        flexDirection: "row",
+        alignItems: "center"
     },
     userImage: {
         width: 70,
@@ -84,5 +89,14 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderColor: "#51A6F5",
         backgroundColor: "black"
+    }, 
+    settingsIcon: {
+        fontSize: 40,
+        borderWidth: 1,
+        padding: 5,
+        borderRadius: 10,
+        backgroundColor: "#51A6F5",
+        textAlign: "center",
+        marginRight: 10
     }
 })

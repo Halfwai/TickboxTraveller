@@ -1,30 +1,22 @@
 import { StyleSheet, View, Text, TouchableOpacity, Button, FlatList } from "react-native";
 import { useState, useEffect, useMemo, useContext } from 'react'
 import { supabase } from '../lib/supabase'
-import { getFollowedUserTicks } from "../helperFunctions/supabaseFunctions";
 import { UserContext } from "../context/Context";
 import { TickView } from "./TickView";
 
 
 
-export const Home = () => {
-    const { session } = useContext(UserContext)
-    const [ticksData, setTicksData] = useState(null)
-
-    useMemo(() => {
-        getFollowedUserTicks(session.user.id, setTicksData);
-    }, []);
-
+export const Home = (props) => {
+    // const { session, currentTicksViewData } = useContext(UserContext)
+    // const [ticksData, setTicksData] = currentTicksViewData
+    const ticksData = props.ticksData;
     if(!ticksData){
         return;
     }
-    // let result = ticksData.map((tick) => {
-    //     return tick.image_url
-    // });
 
     return(
-        <View>
-            { ticksData &&
+        <View style={styles.container}>
+            { ticksData?.length > 0 ?
                 <FlatList
                     nestedScrollEnabled
                     data={ticksData}
@@ -36,9 +28,17 @@ export const Home = () => {
                     keyExtractor={(item) => item.id}
                     initialNumToRender={5}
                     maxToRenderPerBatch={10}
-                />
+                /> :  
+                <Text>Nothing to show here. Please Tick some boxes, or use the search tab to find some travellers to follow</Text>            
             }
-            <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center"
+    }
+})

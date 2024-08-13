@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert, Image, Text, BackHandler } from 'react-native'
+import { StyleSheet, View, BackHandler } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 
 import { UserContext, LocationContext } from '../context/Context'
@@ -14,20 +13,13 @@ import { Header } from '../components/Header';
 import { Home } from '../components/Home';
 import { Profile } from '../components/profile';
 import { Search } from '../components/Search';
+import { Settings } from '../components/Settings';
 
-import { getProfile, getAttractionsData } from '../helperFunctions/supabaseFunctions';
-import { sortAttractions, handleBackAction, getLocationData } from '../helperFunctions/generalFunctions';
-
-import * as Location from 'expo-location';
-
-
-
-
+import { getProfile, getAttractionsData, getFollowedUserTicks } from '../helperFunctions/supabaseFunctions';
+import { sortAttractions, handleBackAction, getLocationData, checkTimeFormat, checkDistanceFormat } from '../helperFunctions/generalFunctions';
 
 export default function MainApp({ session }) {
-    const [avatarUrl, setAvatarUrl] = useState(null)
     const [userData, setUserData] = useState(null);
-
     const [appState, setAppState] = useState('home');
 
     const [ attractions, setAttractions ] = useState(null);
@@ -37,18 +29,41 @@ export default function MainApp({ session }) {
     const [ attractionsSorted, setAttractionsSorted ] = useState(false);
     const [ navigationMap, setNavigationMap ] = useState([])
     const [ profileId, setProfileId] = useState(null);
+    const [ ticksViewData, setTicksViewData ] = useState(null)
+
+    const [ timeFormat, setTimeFormat ] = useState(null);
+    const [ distanceFormat, setDistanceFormat ] = useState(null);
 
     useEffect(() => {
         if (session) {
             try {
-                getProfile(setUserData, session?.user.id);
-                getLocationData(setLocation, setAskForLocation);
-                getAttractionsData(session.user.id, setAttractions);
+                getAsyncData();
             } catch(e){
                 console.log(e);
             }            
         }
     }, [session])
+
+    useEffect(() => {
+        if(location && attractions){
+            setAttractions(sortAttractions(attractions, location, distanceFormat))
+        }
+    }, [distanceFormat])
+
+    useEffect(() => {
+        getFollowedUserTicks(session?.user.id, setTicksViewData);
+    }, [attractions])
+
+
+
+    const getAsyncData = async () => {
+        setTimeFormat(await checkTimeFormat())
+        setDistanceFormat(await checkDistanceFormat())
+        getProfile(setUserData, session?.user.id);
+        getFollowedUserTicks(session?.user.id, setTicksViewData);
+        getLocationData(setLocation, setAskForLocation);
+        getAttractionsData(session?.user.id, setAttractions);
+    }
 
     useEffect(() => {
         const backHandler = BackHandler.addEventListener(
@@ -78,7 +93,7 @@ export default function MainApp({ session }) {
     }
 
     if(!attractionsSorted){
-        setAttractions(sortAttractions(attractions, location))
+        setAttractions(sortAttractions(attractions, location, distanceFormat))
         setAttractionsSorted(true);
     }
 
@@ -91,9 +106,11 @@ export default function MainApp({ session }) {
                 attractionsList: [attractions, setAttractions],
                 ticksList: [ticks, setTicks],
                 currentLocation: [location, setLocation],
-                userDataState: [userData, setUserData],
-                avatarState: [avatarUrl, setAvatarUrl],
-                currentProfileId: [ profileId, setProfileId]
+                currentUserData: [userData, setUserData],
+                currentProfileId: [ profileId, setProfileId],
+                currentTicksViewData: [ ticksViewData, setTicksViewData ],
+                currentTimeFormat: [timeFormat, setTimeFormat],
+                currentDistanceFormat: [distanceFormat, setDistanceFormat]
             }        
         }>
             <View style={styles.container}>
@@ -110,7 +127,9 @@ export default function MainApp({ session }) {
                         <Map />
                     }
                     {appState == "home" && 
-                        <Home />
+                        <Home 
+                            ticksData={ticksViewData}
+                        />
                     }
                     {appState == "profile" &&
                         <Profile 
@@ -120,6 +139,9 @@ export default function MainApp({ session }) {
                     {appState == "search" &&
                         <Search />
                     } 
+                    {appState == "settings" &&
+                        <Settings />                        
+                    }
                 </View>
                 <View style={styles.footerContainer}>
                     <BottomMenu />

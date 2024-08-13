@@ -14,7 +14,7 @@ export const TickBoxContainer = (props) => {
     const [ attractions, setAttractions ] = attractionsList;
 
     const [showDescription, setShowDescription] = useState(false);
-    const [isChecked, setChecked] = useState(props.attraction.ticked);
+    const [isChecked, setChecked] = useState(props.attraction.item.ticked);
     const [tickBoxDisabled, setTickBoxDisabled] = useState(false);
 
     const [showConfirmModel, setShowConfirmModel] = useState(false);
@@ -50,7 +50,7 @@ export const TickBoxContainer = (props) => {
         const imagePath = await saveImageToSupabase(imageUrl, 'tickImages')
         const { data, error } = await supabase
             .from('ticks')
-            .insert({ attraction_id: props.attraction.id, comment: comment, image_url: imagePath ? imagePath : null })
+            .insert({ attraction_id: props.attraction.item.id, comment: comment, image_url: imagePath ? imagePath : null })
             .select()
         if(data){
             console.log("tick inserted")
@@ -66,7 +66,7 @@ export const TickBoxContainer = (props) => {
             .from('ticks')
             .delete()
             .eq("user_id", props.session.user.id)
-            .eq("attraction_id", props.attraction.id)
+            .eq("attraction_id", props.attraction.item.id)
             .select()        
         if (data){
             if(data[0].image_url){
@@ -81,7 +81,7 @@ export const TickBoxContainer = (props) => {
 
     function updateAttractions(bool){
         const updatedAttractions = attractions.map((attraction, i) => {
-            if(attraction.id == props.attraction.id){
+            if(attraction.id == props.attraction.item.id){
                 return {
                     ...attraction,
                     ticked: bool
@@ -112,21 +112,21 @@ export const TickBoxContainer = (props) => {
                             setShowDescription(!showDescription);
                         }}
                     />
-                    <Text style={styles.tickBoxMainText}>{props.attraction.name}</Text>
+                    <Text style={styles.tickBoxMainText}>{props.attraction.item.name}</Text>
                 </View>
                 <View style={styles.tickBoxDistanceContainer}>
-                    <Text>{`${props.attraction.currentDistance} Km away`}</Text>
+                    <Text>{props.attraction.item.currentDistance}</Text>
                 </View>                
             </View>
             {showDescription && (
                 <View style={[styles.descriptionContainer]} >
-                    <Text>{props.attraction.description}</Text>    
+                    <Text>{props.attraction.item.description}</Text>    
                 </View>
             )}
 
             <View style={styles.tickBoxElementContainer}>
                 <Image
-                    source={{ uri: props.attraction.url }}
+                    source={{ uri: props.attraction.item.url }}
                     style={styles.attractionImage}
                 />
                 <Animated.Image 
@@ -161,7 +161,7 @@ export const TickBoxContainer = (props) => {
                 }}>
                 <View style={styles.modelContainer}>
                     <ConfirmTickBox 
-                        attraction={props.attraction}
+                        attraction={props.attraction.item}
                         add={isChecked}
                         hide={() => {
                             setShowConfirmModel(false)
@@ -185,7 +185,7 @@ export const TickBoxContainer = (props) => {
             >
                 <View style={styles.modelContainer}>
                     <CancelTickBox 
-                        attraction={props.attraction}
+                        attraction={props.attraction.item}
                         add={isChecked}
                         hide={() => {
                             setShowCancelModel(false)

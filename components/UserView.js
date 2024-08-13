@@ -1,7 +1,9 @@
-import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
-import { useState, useMemo } from 'react'
-import { getImageUrl, removeFollow, insertFollow } from "../helperFunctions/supabaseFunctions";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { useState } from 'react'
+import { removeFollow, insertFollow } from "../helperFunctions/supabaseFunctions";
 import { CustomButton } from "./GenericComponents";
+
+import { AvatarImage } from "./AvatarImage";
 
 export const UserView = (props) => {
     const user = props.user.item;
@@ -10,15 +12,7 @@ export const UserView = (props) => {
         return
     }
 
-    const [avatarUrl, setAvatarUrl] = useState(null);
-    const [isFollowing, setIsFollowing] = useState(user.is_following)
-
-    useMemo(() => {
-        if(user.avatar_url){
-            getImageUrl(setAvatarUrl, user.avatar_url, "avatars");
-        }        
-    })
-    
+    const [isFollowing, setIsFollowing] = useState(user.is_following) 
 
     return(
         <View style={styles.userContainer}>
@@ -27,14 +21,11 @@ export const UserView = (props) => {
                     props.action();
                 }}
             >
-                <Image
-                    source={{ uri: avatarUrl }}
-                    style={styles.userImage}
-                    resizeMode="contain"
+                <AvatarImage 
+                    data={user}
                 />
                 <Text style={styles.nameText}>{user.full_name}</Text>
             </TouchableOpacity>
-
             <CustomButton 
                 style={[styles.button, isFollowing && {backgroundColor: "gray"}]}
                 text={isFollowing ? "Following" : "Follow"}
@@ -47,10 +38,7 @@ export const UserView = (props) => {
                     setIsFollowing(!isFollowing);
                 }}
             />
-
-        </View>
-
-        
+        </View>        
     ) 
 }
 

@@ -26,9 +26,7 @@ export const Search = () => {
     const { session, currentProfileId, currentAppState, currentNavigationMap } = useContext(UserContext)
     const [ profileId, setProfileId ] = currentProfileId;
     const [ appState, setAppState ] = currentAppState;
-    const [ navigationMap, setNavigationMap ] = currentNavigationMap;
-    
-
+    const [ navigationMap, setNavigationMap ] = currentNavigationMap; 
 
     const [selectedId, setSelectedId] = useState('full_name');
     const [searchText, setSearchText] = useState("")

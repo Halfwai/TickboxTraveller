@@ -1,13 +1,19 @@
 import { StyleSheet, View, Image, Text, Dimensions } from 'react-native'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useContext } from 'react'
+import { UserContext } from '../context/Context';
+
+import { AvatarImage } from './AvatarImage'
 
 import ImageModal from 'react-native-image-modal'
 
 export const TickView = ({tick}) => {
+    const { currentTimeFormat } = useContext(UserContext);
+    const [ timeFormat ] = currentTimeFormat;
     let formatTime = () => {
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const date = new Date(tickData.updated_at)
-        const currentDate = new Intl.DateTimeFormat('en-US', {
+        const timeFormatStyle = timeFormat == "12h" ? "en-US" : "en-UK"
+        const currentDate = new Intl.DateTimeFormat(timeFormatStyle, {
             dateStyle: 'full',
             timeStyle: 'short',
             timeZone: timezone,
@@ -24,17 +30,9 @@ export const TickView = ({tick}) => {
     return (
         <View style={styles.tickInfoContainer}>
             <View style={styles.topContainer}>
-                <View style={styles.avatarContainer}>
-                    { tickData.avatar_url ?
-                        <Image
-                            style={styles.tickProfileImage}
-                            source={{uri: tickData.avatar_url}}
-                        /> :
-                        <Text style={styles.imageReplacementText}>
-                            {tickData.full_name[0]}
-                        </Text>
-                    }  
-                </View>
+                <AvatarImage 
+                    data={tickData}
+                />
                 <View style={{flexShrink: 1}}>
                     <Text style={styles.tickText}>
                         {`${tickData.full_name} `}
@@ -82,26 +80,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingVertical: 10
     },
-    avatarContainer: {
-        alignItems: "center",
-        justifyContent: "center",
-        height: 52,
-        width: 52,
-        marginRight: 10,
-        backgroundColor: "black",
-        borderRadius: 25,
-        borderWidth: 2,
-        borderColor: "#51A6F5"
-    },
-    tickProfileImage: {
-        height: 50,
-        width: 50,
-        borderRadius: 25,                   
-    },
-    imageReplacementText: {
-        color: "white",
-        fontSize: 30
-    },
+    
     tickText: {
         flexWrap: "wrap"
     },

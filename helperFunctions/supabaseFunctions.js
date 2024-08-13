@@ -44,9 +44,6 @@ export async function getProfile(setUserData, id) {
         }
     } catch (error) {
         console.log(error)
-        if (error instanceof Error) {
-            Alert.alert(error.message)
-        }
     }
 }
 
@@ -57,7 +54,6 @@ export const getTicksData = async (setTicks, id) => {
         })
     if(data){
         const dataWithUrls = await handleImageUrls(data)
-        console.log(dataWithUrls);
         setTicks(dataWithUrls)
     }
     if (error){
@@ -66,13 +62,21 @@ export const getTicksData = async (setTicks, id) => {
 }
 
 export const getUserData = async (setUserData, searchType, searchString, userId) => {
-    console.log(userId)
     const { data, error } = await supabase
         .rpc('get_user_data', { user_id: userId})
         .like(searchType, `%${searchString}%`)
-
     if (data){
-        setUserData(data)
+        const imageUrls = data.map((tick) => {
+            return tick.avatar_url
+        });
+        const signedAvatarUrls = await getImageUrls(imageUrls, 'avatars')
+        const dataWithImageUrls = data.map((profile, i) => {
+            return {
+                ...profile,
+                avatar_url: signedAvatarUrls[i].signedUrl
+            };
+        })
+        setUserData(dataWithImageUrls)
     }
     if (error){
         console.log(error)
@@ -108,9 +112,7 @@ export const removeFollow = async (followerId, followeeId) => {
 } 
 
 export const removeImage = async (image, bucket) => {
-    console.log(image)
     if(!image){
-        console.log("No Image")
         return null;
     }
     try {
@@ -153,8 +155,6 @@ export const saveImageToSupabase = async (image, bucket) => {
         }
     } catch (error) {
         console.log(error);
-    } finally {
-        console.log(imagePath)        
     }
 }
 
@@ -162,11 +162,15 @@ export const getFollowedUserTicks = async (user_id, setData) => {
     try {
         let { data: tickData, error: tickError } = await supabase
             .rpc('get_followed_user_ticks', {
-                user_id: user_id
+                input_id: user_id
             })
         if (tickError) {
             throw(tickError)  
         } else {
+            if (tickData.length == 0){
+                setData(tickData)
+                return;
+            }
             const dataWithUrls = await handleImageUrls(tickData);
             setData(dataWithUrls);
         }
@@ -232,4 +236,5 @@ export const getAttractionsData = async (user_id, setAttractions) => {
         console.log(`Attractions Error: ${error.message}`);
     }
 }
+
 

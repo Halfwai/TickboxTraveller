@@ -3,8 +3,9 @@ import * as ImagePicker from 'expo-image-picker'
 import { getDistance, orderByDistance } from 'geolib';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useContext } from 'react'
 
-import { LocationContext } from '../context/Context';
+
 import { GetLocationBox } from '../components/GetLocationBox';
 
 
@@ -38,14 +39,9 @@ export async function uploadImage(setImage, setUploading) {
     }
 }
 
-export const updateAppState = (newAppState, appState, setAppState, navigationMap, setNavigationMap) => {
-    const upDatedNavigationMap = [...navigationMap]
-    upDatedNavigationMap.push(appState);
-    setAppState(newAppState);
-    setNavigationMap(upDatedNavigationMap);
-}
 
-export const sortAttractions = (attractionsList, location) => {
+
+export const sortAttractions = (attractionsList, location, distanceFormat) => {
     let sortedAttractionsList = [...attractionsList];
     sortedAttractionsList = orderByDistance(location, sortedAttractionsList);
     for (let i = 0; i < sortedAttractionsList.length; i++){
@@ -53,7 +49,12 @@ export const sortAttractions = (attractionsList, location) => {
             latitude: sortedAttractionsList[i].latitude,
             longitude: sortedAttractionsList[i].longitude,
         }
-        sortedAttractionsList[i].currentDistance = (getDistance(location, attractionLocation) / 1000).toFixed(2);
+        const distance = (getDistance(location, attractionLocation) / 1000).toFixed(2)
+        let distanceString = `${distance} Km away`
+        if(distanceFormat == "miles"){
+            distanceString = `${(distance * 0.621371).toFixed(2)} miles away`;
+        }
+        sortedAttractionsList[i].currentDistance = distanceString;
     }
     return sortedAttractionsList
 }
@@ -75,6 +76,13 @@ export const handleBackAction = (navigationMap, setAppState, setNavigationMap) =
     }
     return true;
 };
+
+export const updateAppState = (newAppState, appState, setAppState, navigationMap, setNavigationMap) => {
+    const upDatedNavigationMap = [...navigationMap]
+    upDatedNavigationMap.push(appState);
+    setAppState(newAppState);
+    setNavigationMap(upDatedNavigationMap);
+}
 
 export const getLocationData = async (setLocation, setAskForLocation) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -106,5 +114,53 @@ const checkLocationData = async() => {
         return value;
     } catch (e) {
         return false;
+    }
+}
+
+export const checkTimeFormat = async() => {
+    const timeFormat = await AsyncStorage.getItem('timeFormat');
+    if(timeFormat == null){
+        await AsyncStorage.setItem(
+            'timeFormat',
+            '12h',
+        );
+        return '12h';
+    }
+    return timeFormat;
+}
+
+export const saveTimeFormat = async(newFormat) => {
+    try {
+        await AsyncStorage.setItem(
+            'timeFormat',
+            newFormat,
+        );
+    }
+    catch (error){
+        console.log(`Error setting time format: ${error}`)
+    }
+}
+
+export const checkDistanceFormat = async() => {
+    const distanceFormat = await AsyncStorage.getItem('distanceFormat');
+    if(distanceFormat == null){
+        await AsyncStorage.setItem(
+            'distanceFormat',
+            'km',
+        );
+        return 'km';
+    }
+    return distanceFormat;
+}
+
+export const saveDistanceFormat = async(newFormat) => {
+    try {
+        await AsyncStorage.setItem(
+            'distanceFormat',
+            newFormat,
+        );
+    }
+    catch (error){
+        console.log(`Error setting distance format: ${error}`)
     }
 }
