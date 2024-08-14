@@ -28,8 +28,11 @@ export const Home = (props) => {
                     keyExtractor={(item) => item.id}
                     initialNumToRender={5}
                     maxToRenderPerBatch={10}
-                /> :  
-                <Text>Nothing to show here. Please Tick some boxes, or use the search tab to find some travellers to follow</Text>            
+                /> :
+                <View style={styles.textContainer}>
+                   <Text style={styles.text}>Nothing to show here. Please Tick some boxes, or use the search tab to find some fellow travellers to follow✈️</Text>     
+                </View>
+                        
             }
         </View>
     )
@@ -40,5 +43,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center"
+    },
+    textContainer: {
+        padding: 30
+    },
+    text: {
+        fontSize: 20
     }
 })

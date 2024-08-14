@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { sortAttractions } from './generalFunctions';
+import { Alert} from "react-native";
 
 export async function getImageUrl(path, bucket) {
     if(!path){
@@ -8,7 +9,12 @@ export async function getImageUrl(path, bucket) {
     try {
         const { data, error } = await supabase.storage
             .from(bucket)
-            .createSignedUrl(path, 3600)
+            .createSignedUrl(path, 3600, {transform: {
+                width: 10,
+                height: 10,
+            },
+        })
+
         if (error) {
             throw error
         }
@@ -17,7 +23,6 @@ export async function getImageUrl(path, bucket) {
         }
     } catch (error) {
         console.log('Error getting URL: ', error.message)
-
     }
 }
 
@@ -36,7 +41,7 @@ export async function getProfile(setUserData, id) {
                 const imageUrl = await getImageUrl(data.avatar_url, "avatars")
                 setUserData({
                     ...data,
-                    avatar_url: imageUrl
+                    avatar_signedUrl: imageUrl
                 })
                 return;
             }
@@ -73,7 +78,7 @@ export const getUserData = async (setUserData, searchType, searchString, userId)
         const dataWithImageUrls = data.map((profile, i) => {
             return {
                 ...profile,
-                avatar_url: signedAvatarUrls[i].signedUrl
+                avatar_signedUrl: signedAvatarUrls[i].signedUrl
             };
         })
         setUserData(dataWithImageUrls)
@@ -191,8 +196,8 @@ const handleImageUrls = async (tickData) => {
     const dataWithImageUrls = tickData.map((tick, i) => {
         return {
         ...tick,
-        image_url: signedTickUrls[i].signedUrl,
-        avatar_url: signedProfileUrls[i].signedUrl
+        image_signedUrl: signedTickUrls[i].signedUrl,
+        avatar_signedUrl: signedProfileUrls[i].signedUrl
         };
     })
     return dataWithImageUrls;
@@ -202,7 +207,7 @@ const handleImageUrls = async (tickData) => {
 
 
 export const getImageUrls = async (path, bucket) => {
-    let imageSize = 50
+    let imageSize = 10
     if(bucket == "tickImages"){
         imageSize = 200
     }
@@ -237,4 +242,33 @@ export const getAttractionsData = async (user_id, setAttractions) => {
     }
 }
 
+export async function signUpWithEmail(image, email, password, fullName) {
+    let imagePath = await saveImageToSupabase(image, "avatars")
+    
+    const {data, error } = await supabase.auth
+        .signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    full_name: fullName,
+                    avatar_url: imagePath != null ? imagePath : "",
+                    email: email
+                }
+            },
+        })
+
+    if (error){
+        console.log(error);
+        if (error.message === "Database error saving new user"){
+            Alert.alert("User name already in use. Please try different user name")
+        } else {
+            Alert.alert(error.message)
+        }            
+    }
+
+    if (data){
+        
+    }
+}
 

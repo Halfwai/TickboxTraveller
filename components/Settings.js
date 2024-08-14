@@ -2,7 +2,7 @@ import { StyleSheet, View, Text, Image, TextInput, Button } from "react-native";
 import { UserContext } from '../context/Context'
 import { useContext, useState, useEffect, useRef } from 'react'
 import { CustomButton, ToggleButton } from "./GenericComponents";
-import { saveTimeFormat, saveDistanceFormat } from "../helperFunctions/generalFunctions";
+import { saveTimeFormat, saveDistanceFormat, uploadImage } from "../helperFunctions/generalFunctions";
 import { supabase } from '../lib/supabase'
 
 export const Settings = () => {
@@ -14,7 +14,19 @@ export const Settings = () => {
 
     const [ fullName, setFullName ] = useState(userData.full_name);
     const [ email, setEmail] = useState(userData.email);
- 
+
+    const [uploading, setUploading ] = useState(false);
+
+    const [newImage, setNewImage] = useState(null)
+
+    const uploadNewAvatar = async () => {
+        setUploading(true);
+        setNewImage(await uploadImage())
+        setUploading(false);
+    }
+
+    console.log(newImage);
+
     return (
         <View style={styles.container}>
             <Text style={styles.heading}>Settings</Text>
@@ -42,6 +54,21 @@ export const Settings = () => {
                         selectionColor={"black"}
                     />
                 </View>
+            </View>
+            <View style={styles.imageInputContainer}>
+                <Image 
+                    // source={{ uri: userData.avatar_signedUrl }}
+                    source={ newImage ? {uri: newImage.uri} : userData.avatar_signedUrl ? {uri: userData.avatar_signedUrl} : null }
+                    style={styles.avatarImage}
+                    resizeMode='contain'
+                /> 
+                <CustomButton 
+                    action={() => 
+                        uploadNewAvatar()
+                    }
+                    text={uploading ? 'Uploading ...' : newImage || userData.avatar_signedUrl ? 'Replace Avatar' : "Upload Avatar"}
+                    style={{width: "60%"}}
+                />
             </View>
             <CustomButton 
                 text={"Save Changes"}
@@ -133,6 +160,11 @@ const styles = StyleSheet.create({
         width: "70%",
         borderRadius: 10
     },
+    imageInputContainer: {
+        flexDirection: "row",
+        marginBottom: 10,
+        alignItems: "center",
+    },
     settingContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -141,23 +173,8 @@ const styles = StyleSheet.create({
         padding: 10,
         alignItems: "center"
     },
-    toggleContainer:{
-        flexDirection: "row",
-    },
-    toggleButton:{
-        width: 80,
-        height: 50,
-        justifyContent: 'center',
-        backgroundColor: "rgba(80, 80, 80, 0.1)",
-        alignItems: 'center',
-        borderWidth: 2,
-        borderRadius: 10,
-    }, 
-    toggleHighlight: {
-        width: 80,
-        height: 50,
-        backgroundColor: "#51A6F5",
-        position: "absolute",
-        borderRadius: 10,
+    avatarImage: {
+        width: "40%",
+        height: 100,
     }
 })

@@ -116,7 +116,7 @@ export default function MainApp({ session }) {
             <View style={styles.container}>
                 <View style={styles.headerContainer}>
                     <Header 
-                        profileImage={userData.avatar_url}
+                        profileImage={userData.avatar_signedUrl}
                     />
                 </View>
                 <View style={styles.contentContainer}>

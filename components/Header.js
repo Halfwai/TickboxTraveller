@@ -14,6 +14,8 @@ export const Header = (props) => {
     const [profileId, setProfileId] =  currentProfileId;
     const [navigationMap, setNavigationMap] = currentNavigationMap
 
+    console.log(props);
+
     return (
         <View style={styles.headerContainer}>
             <View style={styles.logoContainer}>
@@ -25,13 +27,14 @@ export const Header = (props) => {
                 <Text style={styles.stateText}>{appState}</Text>
             </View>
             <View style={styles.buttonContainer}>
-                <TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => {
+                        updateAppState("settings", appState, setAppState, navigationMap, setNavigationMap)
+                    }}
+                >
                     <FontAwesome 
                         name="cog" 
                         style={styles.settingsIcon}
-                        onPress={() => {
-                            updateAppState("settings", appState, setAppState, navigationMap, setNavigationMap)
-                        }}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity

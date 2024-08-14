@@ -8,11 +8,8 @@ import { useContext } from 'react'
 
 import { GetLocationBox } from '../components/GetLocationBox';
 
-
-export async function uploadImage(setImage, setUploading) {
+export async function uploadImage() {
     try {
-        setUploading(true)
-
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images, // Restrict to only images
             allowsMultipleSelection: false, // Can only select one image
@@ -26,17 +23,15 @@ export async function uploadImage(setImage, setUploading) {
             return
         }
 
-        setImage(result.assets[0]);
+         return result.assets[0];
 
     } catch (error) {
         if (error instanceof Error) {
             Alert.alert(error.message)
         } else {
             throw error
-    }
-    } finally {
-        setUploading(false)
-    }
+        }
+    } 
 }
 
 

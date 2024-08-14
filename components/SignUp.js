@@ -7,7 +7,8 @@ import * as ImagePicker from 'expo-image-picker'
 import { AuthContext } from '../context/Context'
 import { CustomButton } from './GenericComponents'
 
-import { saveImageToSupabase } from '../helperFunctions/supabaseFunctions'
+import { signUpWithEmail } from '../helperFunctions/supabaseFunctions'
+import { uploadImage } from '../helperFunctions/generalFunctions'
 
 
 
@@ -26,44 +27,13 @@ export const SignUp = () => {
     const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    async function signUpWithEmail() {
+    async function signUp() {
         if (!validateInput()){
             return;
         }
-
         setLoading(true)
-        let imagePath = await saveImageToSupabase(image, "avatars")
-        
-        const {
-            data,
-            error,
-        } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    full_name: fullName,
-                    avatar_url: imagePath != null ? imagePath : "",
-                    email: email
-                }
-            },
-        })
-
-        if (error){
-            console.log(error);
-            if (error.message === "Database error saving new user"){
-                Alert.alert("User name already in use. Please try different user name")
-            } else {
-                Alert.alert(error.message)
-            }            
-        }
-
-        if (data){
-            
-        }
-        // if (!session) Alert.alert('Please check your inbox for email verification!')
+        await signUpWithEmail(image, email, password, fullName);
         setLoading(false)
-
     }
 
 
@@ -203,7 +173,7 @@ export const SignUp = () => {
                 <View style={styles.inputContainer}>
                     <CustomButton 
                         action={() => {
-                            signUpWithEmail()
+                            signUp()
                         }}
                         text={"Sign Up"}
                         disabled={loading} 
