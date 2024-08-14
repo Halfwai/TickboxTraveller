@@ -14,8 +14,6 @@ export const Header = (props) => {
     const [profileId, setProfileId] =  currentProfileId;
     const [navigationMap, setNavigationMap] = currentNavigationMap
 
-    console.log(props);
-
     return (
         <View style={styles.headerContainer}>
             <View style={styles.logoContainer}>

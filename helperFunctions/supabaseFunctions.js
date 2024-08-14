@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { sortAttractions } from './generalFunctions';
-import { Alert} from "react-native";
+import { Alert } from "react-native";
 
 export async function getImageUrl(path, bucket) {
     if(!path){
@@ -58,8 +58,14 @@ export const getTicksData = async (setTicks, id) => {
             input_id: id
         })
     if(data){
-        const dataWithUrls = await handleImageUrls(data)
-        setTicks(dataWithUrls)
+        if(data.length > 0){
+            const dataWithUrls = await handleImageUrls(data)
+            setTicks(dataWithUrls)
+            return
+        }
+        setTicks(data);
+        
+        
     }
     if (error){
         console.log(error);
@@ -270,5 +276,37 @@ export async function signUpWithEmail(image, email, password, fullName) {
     if (data){
         
     }
+}
+
+export const updateProfile = async (id, full_name, email, image) => {
+    try{
+        const { data, error } = await supabase.auth.updateUser({
+            email: email
+          })
+        let updatedUser = {
+            full_name: full_name, 
+            email: email
+        }
+        if(error){
+            throw error;
+        }
+        console.log(data)
+        if(image){
+            updatedUser.avatar_url = await saveImageToSupabase(image, "avatars")
+        }
+        const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .update(updatedUser)
+            .eq('id', id)
+        if(profileError){
+            throw profileError;
+        }
+        console.log(profileData);
+    }
+    catch (error) {
+
+    }
+    
+    
 }
 

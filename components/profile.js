@@ -27,7 +27,7 @@ export const Profile = () => {
                     <View style={styles.avatarContainer}>
                         { profileData.avatar_url ?
                             <Image
-                                source={{ uri: profileData.avatar_url }}
+                                source={{ uri: profileData.avatar_signedUrl }}
                                 style={styles.profileImage}
                                 resizeMode={"contain"}
                             /> :

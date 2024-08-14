@@ -3,6 +3,7 @@ import { UserContext } from '../context/Context'
 import { useContext, useState, useEffect, useRef } from 'react'
 import { CustomButton, ToggleButton } from "./GenericComponents";
 import { saveTimeFormat, saveDistanceFormat, uploadImage } from "../helperFunctions/generalFunctions";
+import { updateProfile } from "../helperFunctions/supabaseFunctions"
 import { supabase } from '../lib/supabase'
 
 export const Settings = () => {
@@ -16,6 +17,7 @@ export const Settings = () => {
     const [ email, setEmail] = useState(userData.email);
 
     const [uploading, setUploading ] = useState(false);
+    const [updating, setUpdating] = useState(false);
 
     const [newImage, setNewImage] = useState(null)
 
@@ -25,7 +27,11 @@ export const Settings = () => {
         setUploading(false);
     }
 
-    console.log(newImage);
+    const handleUpdate = async() => {
+        setUpdating(true)
+        await updateProfile(userData.id, fullName, email, newImage);
+        setUpdating(false)
+    }
 
     return (
         <View style={styles.container}>
@@ -71,9 +77,9 @@ export const Settings = () => {
                 />
             </View>
             <CustomButton 
-                text={"Save Changes"}
+                text={updating? "Saving Changes":"Save Changes"}
                 action={() => {
-                    console.log("here")
+                    handleUpdate();
                 }}
             />
             <View style={styles.subheadingContainer}>

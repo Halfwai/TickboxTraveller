@@ -5,6 +5,8 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useContext } from 'react'
 
+import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+
 
 import { GetLocationBox } from '../components/GetLocationBox';
 
@@ -23,7 +25,13 @@ export async function uploadImage() {
             return
         }
 
-         return result.assets[0];
+        const compressedImage = await manipulateAsync(
+            result.assets[0].uri,
+            [{ resize: { height: 200} }],
+            { compress: 0.2, format: SaveFormat.WEBP }
+        );
+
+        return compressedImage;
 
     } catch (error) {
         if (error instanceof Error) {
