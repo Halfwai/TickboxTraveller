@@ -48,7 +48,7 @@ export const TickView = ({tick}) => {
             <View style={styles.imageCommentContainer}>
                 { tickData.image_url &&
                     <ImageModal 
-                        source={{uri: tickData.image_url}}
+                        source={{uri: tickData.image_signedUrl}}
                         style={[styles.tickImage, {width: windowWidth - 20}]}
                         resizeMode='contain'
                         animationDuration={300}

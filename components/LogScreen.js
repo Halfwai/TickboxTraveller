@@ -5,22 +5,24 @@ import { UserContext } from '../context/Context';
 
 import { TickBoxContainer } from './TickBoxContainer'
 
-export function LogScreen() {
-    const { session, attractionsList } = useContext(UserContext);
-    const [ attractions ] = attractionsList;
+export function LogScreen(props) {
+    // const { session, currentAttractions } = useContext(UserContext);
+    // const [ attractions ] = currentAttractions;
+    const session = props.session;
+    const attractions = props.attractions;
     return (
         <View style={styles.container}>
             <View style={styles.attractionsContainer}>
                 <FlatList 
                     nestedScrollEnabled
                     data={attractions}
-                    renderItem={attraction => 
+                    renderItem={attraction => (
                         <TickBoxContainer 
-                            attraction={attraction}
+                            attraction={attraction.item}
                             session={session}
-                            key={attraction.id}
-                        />
-                    }
+                            key={attraction.item.id}
+                        /> 
+                    )}
                 />
             </View>
         </View>

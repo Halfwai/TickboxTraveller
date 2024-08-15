@@ -127,15 +127,12 @@ export const removeImage = async (image, bucket) => {
         return null;
     }
     try {
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
             .from(bucket)
             .remove(image)
 
         if (error) {
             throw error
-        }
-        if(data){
-            console.log(data)
         }
     } catch (error) {
         console.log(error);
@@ -235,13 +232,13 @@ export const getImageUrls = async (path, bucket) => {
     }
 }
 
-export const getAttractionsData = async (user_id, setAttractions) => {
+export const downloadAttractionsData = async (user_id) => {
     let { data, error } = await supabase
-            .rpc('get_attractions_data', {
-                input_id: user_id
-            })
+        .rpc('get_attractions_data', {
+            input_id: user_id
+        })
     if(data){
-        setAttractions(data);
+        return data;
     }
     if(error){
         console.log(`Attractions Error: ${error.message}`);
@@ -278,35 +275,40 @@ export async function signUpWithEmail(image, email, password, fullName) {
     }
 }
 
-export const updateProfile = async (id, full_name, email, image) => {
+export const updateProfile = async (full_name, email, user, image ) => {
     try{
-        const { data, error } = await supabase.auth.updateUser({
-            email: email
-          })
-        let updatedUser = {
-            full_name: full_name, 
-            email: email
+        let updatedUser = {}
+        if(user.full_name != full_name){
+            updatedUser.full_name = full_name
         }
+        if(image){
+            updatedUser.avatar_url = await saveImageToSupabase(image, "avatars")
+            if(user.avatar_url){
+                removeImage(user.avatar_url, "avatars");
+            }
+        }
+        let updatePackage = {}
+        if (user.email != email){
+            updatePackage.email = email
+        }
+        if (Object.keys(updatedUser).length > 0){
+            updatePackage.data = updatedUser;
+        } 
+        if (Object.keys(updatePackage).length == 0){
+            return false;
+        } 
+        const { error } = await supabase.auth.updateUser(updatePackage)
         if(error){
             throw error;
         }
-        console.log(data)
-        if(image){
-            updatedUser.avatar_url = await saveImageToSupabase(image, "avatars")
+        if(email in updatePackage){
+            Alert.alert("Please check new email address to confirm")
         }
-        const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .update(updatedUser)
-            .eq('id', id)
-        if(profileError){
-            throw profileError;
-        }
-        console.log(profileData);
+        return true
     }
     catch (error) {
-
-    }
-    
-    
+        Alert.alert(error.message);
+        return false
+    } 
 }
 

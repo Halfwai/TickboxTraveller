@@ -6,7 +6,7 @@ export const AvatarImage = (props) => {
         { props.data.avatar_url ?
             <Image
                 style={styles.tickProfileImage}
-                source={{uri: props.data.avatar_url}}
+                source={{uri: props.data.avatar_signedUrl}}
             /> :
             <Text style={styles.imageReplacementText}>
                 {props.data.full_name[0]}

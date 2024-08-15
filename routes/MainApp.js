@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { StyleSheet, View, BackHandler } from 'react-native'
+import { StyleSheet, View, BackHandler, Button } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 
 import { UserContext, LocationContext } from '../context/Context'
@@ -15,8 +15,8 @@ import { Profile } from '../components/profile';
 import { Search } from '../components/Search';
 import { Settings } from '../components/Settings';
 
-import { getProfile, getAttractionsData, getFollowedUserTicks } from '../helperFunctions/supabaseFunctions';
-import { sortAttractions, handleBackAction, getLocationData, checkTimeFormat, checkDistanceFormat } from '../helperFunctions/generalFunctions';
+import { getProfile, downloadAttractionsData, getFollowedUserTicks } from '../helperFunctions/supabaseFunctions';
+import { sortAttractions, handleBackAction, getLocationData, checkTimeFormat, checkDistanceFormat, checkStorageAttractionData, storeAttractionsData, deleteAttractionsData  } from '../helperFunctions/generalFunctions';
 
 export default function MainApp({ session }) {
     const [userData, setUserData] = useState(null);
@@ -55,14 +55,28 @@ export default function MainApp({ session }) {
     }, [attractions])
 
 
-
     const getAsyncData = async () => {
         setTimeFormat(await checkTimeFormat())
         setDistanceFormat(await checkDistanceFormat())
         getProfile(setUserData, session?.user.id);
         getFollowedUserTicks(session?.user.id, setTicksViewData);
         getLocationData(setLocation, setAskForLocation);
-        getAttractionsData(session?.user.id, setAttractions);
+        setAttractions(await getAttractionData())
+    }
+
+    const resetAttractions = async () => {
+        await deleteAttractionsData()
+        const newAttractions = await getAttractionData()
+        setAttractions(sortAttractions(newAttractions, location, distanceFormat))
+    }
+
+    const getAttractionData = async () => {
+        let data = await checkStorageAttractionData()
+        if(!data){
+            data = await downloadAttractionsData(session.user.id)
+            storeAttractionsData(data)
+        }
+        return data;
     }
 
     useEffect(() => {
@@ -103,7 +117,7 @@ export default function MainApp({ session }) {
                 session,
                 currentNavigationMap: [navigationMap, setNavigationMap],
                 currentAppState: [appState, setAppState],
-                attractionsList: [attractions, setAttractions],
+                currentAttractions: [attractions, setAttractions],
                 ticksList: [ticks, setTicks],
                 currentLocation: [location, setLocation],
                 currentUserData: [userData, setUserData],
@@ -121,10 +135,15 @@ export default function MainApp({ session }) {
                 </View>
                 <View style={styles.contentContainer}>
                      {appState == "log ticks" && 
-                        <LogScreen />
+                        <LogScreen 
+                            session={session}
+                            attractions={attractions}
+                        />
                     }
                     {appState == "map" && 
-                        <Map />
+                        <Map 
+                            attractions={attractions}
+                        />
                     }
                     {appState == "home" && 
                         <Home 
@@ -140,7 +159,11 @@ export default function MainApp({ session }) {
                         <Search />
                     } 
                     {appState == "settings" &&
-                        <Settings />                        
+                        <Settings 
+                            resetAttractionsData = {() => {
+                                resetAttractions()
+                            }}
+                        />                        
                     }
                 </View>
                 <View style={styles.footerContainer}>

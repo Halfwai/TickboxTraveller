@@ -15,6 +15,10 @@ export const ConfirmTickBox = (props) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [uploading, setUploading] = useState(false);
 
+    const uploadTickImage = async () =>{
+        setImageUrl(await uploadImage())
+    }
+
     return (
         <View 
             {...props}
@@ -61,7 +65,7 @@ export const ConfirmTickBox = (props) => {
                 }
                 <CustomButton 
                     action={() => {
-                        uploadImage(setImageUrl, setUploading)
+                        uploadTickImage()
                     }}
                     text={uploading ? 'Uploading ...' : 'Upload a picture'}
                     // style={{width: "90%"}}

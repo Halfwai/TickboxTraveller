@@ -1,14 +1,11 @@
-import { Alert } from 'react-native'
+import {  Alert } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { getDistance, orderByDistance } from 'geolib';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useContext } from 'react'
 
-import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+import { manipulateAsync,  SaveFormat } from 'expo-image-manipulator';
 
-
-import { GetLocationBox } from '../components/GetLocationBox';
 
 export async function uploadImage() {
     try {
@@ -166,4 +163,30 @@ export const saveDistanceFormat = async(newFormat) => {
     catch (error){
         console.log(`Error setting distance format: ${error}`)
     }
+}
+
+export const checkStorageAttractionData = async () => {
+    try {
+        const value = await AsyncStorage.getItem('attractionData');
+        if (value !== null) {
+            return JSON.parse(value)
+        }
+        return false
+    } catch (e) {
+        return false
+    }
+}
+
+export const storeAttractionsData = async (data) => {
+    try {
+        const jsonValue = JSON.stringify(data);
+        await AsyncStorage.setItem('attractionData', jsonValue);
+    } catch (error) {
+        Alert.alert(error)    
+    }
+}
+
+export const deleteAttractionsData = async() => {
+    await AsyncStorage.removeItem('attractionData')
+    return;
 }

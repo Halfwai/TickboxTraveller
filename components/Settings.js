@@ -1,15 +1,14 @@
-import { StyleSheet, View, Text, Image, TextInput, Button } from "react-native";
+import { StyleSheet, View, Text, Image, TextInput, ScrollView, Modal, TouchableOpacity } from "react-native";
 import { UserContext } from '../context/Context'
 import { useContext, useState, useEffect, useRef } from 'react'
 import { CustomButton, ToggleButton } from "./GenericComponents";
-import { saveTimeFormat, saveDistanceFormat, uploadImage } from "../helperFunctions/generalFunctions";
-import { updateProfile } from "../helperFunctions/supabaseFunctions"
+import { saveTimeFormat, saveDistanceFormat, uploadImage, deleteAttractionsData } from "../helperFunctions/generalFunctions";
+import { updateProfile, getProfile } from "../helperFunctions/supabaseFunctions"
 import { supabase } from '../lib/supabase'
 
-export const Settings = () => {
-    const { currentUserData, currentTimeFormat, currentDistanceFormat } = useContext(UserContext)
+export const Settings = (props) => {
+    const { currentUserData, currentTimeFormat, currentDistanceFormat, currentAttractions } = useContext(UserContext)
     const [ userData, setUserData ] = currentUserData;
-
     const [ timeFormat, setTimeFormat ] = currentTimeFormat;
     const [ distanceFormat, setDistanceFormat ] = currentDistanceFormat
 
@@ -21,6 +20,8 @@ export const Settings = () => {
 
     const [newImage, setNewImage] = useState(null)
 
+    const [showAppDetails, setShowAppDetails] = useState(false);
+
     const uploadNewAvatar = async () => {
         setUploading(true);
         setNewImage(await uploadImage())
@@ -29,116 +30,177 @@ export const Settings = () => {
 
     const handleUpdate = async() => {
         setUpdating(true)
-        await updateProfile(userData.id, fullName, email, newImage);
+        const profileUpdated = await updateProfile(fullName, email, userData, newImage);
+        if(profileUpdated){
+            await getProfile(setUserData, userData.id)
+        }        
         setUpdating(false)
     }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.heading}>Settings</Text>
-            <View style={styles.subheadingContainer}>
-                <Text style={styles.subheading}>User Settings</Text>
-            </View>
-            <View style={styles.userInputContainer}>
-                <View style={styles.inputContainer}>
-                    <Text>Full Name:</Text>
-                    <TextInput
-                        leftIcon={{type: 'font-awesome', name: 'search', color: 'gray'}}
-                        onChangeText={(text) => setFullName(text)}
-                        value={fullName}
-                        style={styles.input}
-                        selectionColor={"black"}
+            <ScrollView>
+                <Text style={styles.heading}>Settings</Text>
+                <View style={styles.subheadingContainer}>
+                    <Text style={styles.subheading}>User Settings</Text>
+                </View>
+                <View style={styles.userInputContainer}>
+                    <View style={styles.inputContainer}>
+                        <Text>Full Name:</Text>
+                        <TextInput
+                            leftIcon={{type: 'font-awesome', name: 'search', color: 'gray'}}
+                            onChangeText={(text) => setFullName(text)}
+                            value={fullName}
+                            style={styles.input}
+                            selectionColor={"black"}
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Text>Email:</Text>
+                        <TextInput
+                            leftIcon={{type: 'font-awesome', name: 'search', color: 'gray'}}
+                            onChangeText={(text) => setEmail(text)}
+                            value={email}
+                            style={styles.input}
+                            selectionColor={"black"}
+                        />
+                    </View>
+                </View>
+                <View style={styles.imageInputContainer}>
+                    <Image 
+                        source={ newImage ? {uri: newImage.uri} : userData.avatar_signedUrl ? {uri: userData.avatar_signedUrl} : null }
+                        style={styles.avatarImage}
+                        resizeMode='contain'
+                    /> 
+                    <CustomButton 
+                        action={() => 
+                            uploadNewAvatar()
+                        }
+                        text={uploading ? 'Uploading ...' : newImage || userData.avatar_signedUrl ? 'Replace Avatar' : "Upload Avatar"}
+                        style={{width: "60%"}}
                     />
                 </View>
-                <View style={styles.inputContainer}>
-                    <Text>Email:</Text>
-                    <TextInput
-                        leftIcon={{type: 'font-awesome', name: 'search', color: 'gray'}}
-                        onChangeText={(text) => setEmail(text)}
-                        value={email}
-                        style={styles.input}
-                        selectionColor={"black"}
-                    />
-                </View>
-            </View>
-            <View style={styles.imageInputContainer}>
-                <Image 
-                    // source={{ uri: userData.avatar_signedUrl }}
-                    source={ newImage ? {uri: newImage.uri} : userData.avatar_signedUrl ? {uri: userData.avatar_signedUrl} : null }
-                    style={styles.avatarImage}
-                    resizeMode='contain'
-                /> 
                 <CustomButton 
-                    action={() => 
-                        uploadNewAvatar()
-                    }
-                    text={uploading ? 'Uploading ...' : newImage || userData.avatar_signedUrl ? 'Replace Avatar' : "Upload Avatar"}
-                    style={{width: "60%"}}
+                    text={updating? "Saving Changes":"Save Changes"}
+                    disabled={updating}
+                    action={() => {
+                        handleUpdate();
+                    }}
                 />
-            </View>
-            <CustomButton 
-                text={updating? "Saving Changes":"Save Changes"}
-                action={() => {
-                    handleUpdate();
-                }}
-            />
-            <View style={styles.subheadingContainer}>
-                <Text style={styles.subheading}>App Settings</Text>
-            </View>
-            <ToggleButton 
-                title={"Time Format:"}
-                left={{
-                    option: "12h",
-                    action: () => {
-                        setTimeFormat("12h")
-                        saveTimeFormat("12h")
-                    }
-                }}
-                right={{
-                    option: "24h",
-                    action: () => {
-                        setTimeFormat("24h")
-                        saveTimeFormat("24h")
-                    }
-                }}
-                startPosition={timeFormat == '12h' ? 80 : 0}
-            />
-            <ToggleButton 
-                title={"Distance Format:"}
-                left={{
-                    option: "Km",
-                    action: () => {
-                        setDistanceFormat("km")
-                        saveDistanceFormat("km")
-                    }
-                }}
-                right={{
-                    option: "Miles",
-                    action: () => {
-                        setDistanceFormat("miles")
-                        saveDistanceFormat("miles")
-                    }
-                }}
-                startPosition={distanceFormat == 'km' ? 80 : 0}
-            />
-            <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+                <View style={styles.subheadingContainer}>
+                    <Text style={styles.subheading}>App Settings</Text>
+                </View>
+                <ToggleButton 
+                    title={"Time Format:"}
+                    left={{
+                        option: "12h",
+                        action: () => {
+                            setTimeFormat("12h")
+                            saveTimeFormat("12h")
+                        }
+                    }}
+                    right={{
+                        option: "24h",
+                        action: () => {
+                            setTimeFormat("24h")
+                            saveTimeFormat("24h")
+                        }
+                    }}
+                    startPosition={timeFormat == '12h' ? 80 : 0}
+                />
+                <ToggleButton 
+                    title={"Distance Format:"}
+                    left={{
+                        option: "Km",
+                        action: () => {
+                            setDistanceFormat("km")
+                            saveDistanceFormat("km")
+                        }
+                    }}
+                    right={{
+                        option: "Miles",
+                        action: () => {
+                            setDistanceFormat("miles")
+                            saveDistanceFormat("miles")
+                        }
+                    }}
+                    startPosition={distanceFormat == 'km' ? 80 : 0}
+                />
+                <View style={styles.buttonContainer}>
+                    <CustomButton 
+                        text={"About App"}
+                        action={() => {
+                            setShowAppDetails(true);
+                        }}
+                        style={styles.bottomButton}
+                    />
+                    <CustomButton 
+                        text={"Reset Attractions Data"}
+                        action={() => {
+                            props.resetAttractionsData();
+                        }}
+                        style={styles.bottomButton}
+                    />   
+                </View>
+                <View style={styles.buttonContainer}>
+                    <CustomButton 
+                        text={"Sign Out"}
+                        action={() => {
+                            supabase.auth.signOut()
+                        }}
+                        style={styles.signOutButton}
+                    />
+                </View>
+    
+                <Modal 
+                    animationType="slide"
+                    transparent={true}
+                    visible={showAppDetails}
+                >
+                    <View style={styles.modelContainer}>
+                        <View style={styles.modelBox}>
+                            <View style={styles.headingContainer}>
+                                <Image 
+                                        source={require("../assets/images/icon.png")}
+                                        style={styles.logo}
+                                        resizeMode='contain'
+                                />
+                                <Text style={styles.headingText}>TickBox Traveller</Text>
+                            </View>
+                            <Text style={styles.modelText}>Version: 1.0.0</Text>
+                            <View style={styles.infoTextContainer}>
+                                <Text style={styles.modelText}>Tickbox Traveller was created and coded by Wai-San Lee. 
+                                    All attraction images are royalty free from Pixabay and Unsplash. All Map icons were
+                                    taken from icons8.com. 
+                                </Text>
+                            </View>
 
+                            <CustomButton 
+                                text={"Close"}
+                                action={() => {
+                                    setShowAppDetails(false);
+                                }}
+                            />
+                        </View>                      
+                    </View>
+                </Modal> 
+            </ScrollView>           
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20,
+        paddingHorizontal: 10,
         alignItems: "center"
     },
     heading: {
-        fontSize: 30,
+        fontSize: 25,
         fontWeight: "bold"
     },
     subheadingContainer: {
         width: "100%",
-        paddingHorizontal: 10,
+        paddingHorizontal: 0,
         borderBottomWidth: 1,
         borderBottomColor: "#51A6F5"
     },
@@ -182,5 +244,53 @@ const styles = StyleSheet.create({
     avatarImage: {
         width: "40%",
         height: 100,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: "space-between",
+        width: "100%"
+    },
+    bottomButton: {
+        width: "48%",
+    },
+    modelContainer: {
+        height: "100%", 
+        width: "100%", 
+        justifyContent: "center", 
+        alignItems: "center",
+        padding: 20
+    },
+    modelBox: {
+        borderWidth: 3,
+        backgroundColor: "#1D4A7A",
+        padding: 10,
+        borderRadius: 10,
+        justifyContent: "center", 
+        alignItems: "center",
+        width: "100%"
+    },
+    headingContainer:{
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    headingText: {
+        color: "white",
+        fontSize: 25
+    },
+    logo: {
+        width: 80,
+        height: 80,
+        overflow: "hidden",
+    },
+    infoTextContainer: {
+        marginVertical: 20
+    },
+    modelText: {
+        color: "white",
+        fontSize: 15
+    },
+    signOutButton: {
+        width: "100%",
+        marginVertical: 10
     }
 })

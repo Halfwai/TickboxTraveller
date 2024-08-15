@@ -4,18 +4,21 @@ import { supabase } from '../lib/supabase'
 import { UserContext } from "../context/Context";
 import { TickView } from "./TickView";
 
+import { checkStorageAttractionData } from "../helperFunctions/generalFunctions";
+import { getAttractionsData } from "../helperFunctions/supabaseFunctions";
+
 
 
 export const Home = (props) => {
-    // const { session, currentTicksViewData } = useContext(UserContext)
-    // const [ticksData, setTicksData] = currentTicksViewData
     const ticksData = props.ticksData;
     if(!ticksData){
         return;
     }
 
+
+
     return(
-        <View style={styles.container}>
+        <View>
             { ticksData?.length > 0 ?
                 <FlatList
                     nestedScrollEnabled
@@ -30,7 +33,9 @@ export const Home = (props) => {
                     maxToRenderPerBatch={10}
                 /> :
                 <View style={styles.textContainer}>
-                   <Text style={styles.text}>Nothing to show here. Please Tick some boxes, or use the search tab to find some fellow travellers to follow✈️</Text>     
+                   <Text style={styles.text}>
+                        Nothing to show here. Please Tick some boxes, or use the search tab to find some fellow travellers to follow✈️
+                    </Text>     
                 </View>
                         
             }

@@ -4,7 +4,7 @@ import { useRef } from 'react';
 export const CustomButton = (props) => (
     <TouchableOpacity
         {...props}
-        style={[styles.customButton, props.style]}
+        style={[styles.customButton, props.style, props.disabled && styles.disabledButton ]}
         {...props.attributes}
         onPress={props.action}
         disabled={props.disabled}
@@ -76,12 +76,15 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 15,
         textAlign: "center"
-    },    
+    },
+    disabledButton: {
+        backgroundColor: "gray"
+    },
     settingContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
         width: "100%",
-        padding: 10,
+        padding: 5,
         alignItems: "center"
     },
     toggleContainer:{

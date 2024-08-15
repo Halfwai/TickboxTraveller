@@ -6,17 +6,21 @@ import { UserContext } from '../context/Context'
 
 import { TickBoxContainer } from './TickBoxContainer'
 
-export function Map() {
-    const { session, currentLocation, attractionsList } = useContext(UserContext)
+export function Map(props) {
+    const { session, currentLocation } = useContext(UserContext)
     const [location, setLocation] = currentLocation
 
 
-    const attractions = attractionsList[0];
+    const attractions = props.attractions;
     // const iconImage = require(`../assets/mapIcons/nature.png`)
 
     const [ showAttractionBox, setShowAttractionBox ] = useState(false);
-    const [ attraction, setAttraction ] = useState(attractions[0]);
+    const [ attraction, setAttraction ] = useState();
 
+    const setupAttractionBox = async (attraction) => {
+        await setAttraction(attraction)
+        setShowAttractionBox(true);
+    }
 
     return (
         <View style={styles.container}>
@@ -56,31 +60,14 @@ export function Map() {
                             require(`../assets/mapIcons/history.png`) :
                             require(`../assets/mapIcons/shopping.png`)
                         }
-                        onPress={() => {
-                            setShowAttractionBox(true)
-                            setAttraction(attraction);
+                        onPress={() => {                            
+                            setupAttractionBox(attraction);
                         }}
-                        // onCalloutPress={() => {
-
-                        // }}
                     > 
-                        {/* <Callout style={styles.callout}>
-                            <View style={styles.calloutContainer}>
-                                <Text>
-                                    {attraction.name}
-                                </Text>
-                            </View>
-
-                       </Callout> */}
                     </Marker>
                     )
-
                 })
-
                 }
-                    
-
-
             </MapView>
             {showAttractionBox &&
                 <View style={styles.detailsContainer}>
