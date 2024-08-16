@@ -1,19 +1,16 @@
 import React, { useContext, useState }from 'react';
 import MapView, { Marker } from 'react-native-maps';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Dimensions } from 'react-native';
 
 import { UserContext } from '../context/Context'
 
 import { TickBoxContainer } from './TickBoxContainer'
 
 export function Map(props) {
-    const { session, currentLocation } = useContext(UserContext)
-    const [location, setLocation] = currentLocation
-
-
-    const attractions = props.attractions;
-    // const iconImage = require(`../assets/mapIcons/nature.png`)
-
+    const windowWidth = Dimensions.get('window').width;
+    const session = props.session;
+    const attractions = [...props.attractions];
+    const location = props.location;
     const [ showAttractionBox, setShowAttractionBox ] = useState(false);
     const [ attraction, setAttraction ] = useState();
 
@@ -74,6 +71,7 @@ export function Map(props) {
                     <TickBoxContainer 
                         attraction={attraction}
                         session={session}
+                        imageWidth={windowWidth * 0.85}
                     />
                 </View>
             }
@@ -108,7 +106,7 @@ const styles = StyleSheet.create({
         width: "90%",
         top: "25%",
         left: "5%",
-        padding: 10,
+        padding: "2.5%",
         borderRadius: 10
     }
 });

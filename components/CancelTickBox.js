@@ -41,13 +41,13 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: "#51A6F5",
         borderRadius: 10,
-        paddingVertical: 10
+        padding: 10
     },
     headingContainer: {
         alignItems: "center",
         marginVertical: 20,
-        textAlign: "center"
-
+        textAlign: "center",
+        padding: 10
     },
     congratText: {
         fontSize: 30,

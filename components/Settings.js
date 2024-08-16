@@ -5,8 +5,9 @@ import { CustomButton, ToggleButton } from "./GenericComponents";
 import { saveTimeFormat, saveDistanceFormat, uploadImage, deleteAttractionsData } from "../helperFunctions/generalFunctions";
 import { updateProfile, getProfile } from "../helperFunctions/supabaseFunctions"
 import { supabase } from '../lib/supabase'
+import { Input } from './Input'
 
-export const Settings = (props) => {
+export const Settings = ({resetAttractionsData, gpsPermissionGranted, showLocationScreen}) => {
     const { currentUserData, currentTimeFormat, currentDistanceFormat, currentAttractions } = useContext(UserContext)
     const [ userData, setUserData ] = currentUserData;
     const [ timeFormat, setTimeFormat ] = currentTimeFormat;
@@ -45,26 +46,22 @@ export const Settings = (props) => {
                     <Text style={styles.subheading}>User Settings</Text>
                 </View>
                 <View style={styles.userInputContainer}>
-                    <View style={styles.inputContainer}>
-                        <Text>Full Name:</Text>
-                        <TextInput
-                            leftIcon={{type: 'font-awesome', name: 'search', color: 'gray'}}
-                            onChangeText={(text) => setFullName(text)}
-                            value={fullName}
-                            style={styles.input}
-                            selectionColor={"black"}
-                        />
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <Text>Email:</Text>
-                        <TextInput
-                            leftIcon={{type: 'font-awesome', name: 'search', color: 'gray'}}
-                            onChangeText={(text) => setEmail(text)}
-                            value={email}
-                            style={styles.input}
-                            selectionColor={"black"}
-                        />
-                    </View>
+                    <Input 
+                        title={"Full Name"}
+                        value={fullName}
+                        onChange={(text) => {
+                            setFullName(text)
+                        }}
+                        color={"lightgray"}
+                    />
+                    <Input 
+                        title={"Email"}
+                        value={email}
+                        onChange={(text) => {
+                            setEmail(text)
+                        }}
+                        color={"lightgray"}
+                    />
                 </View>
                 <View style={styles.imageInputContainer}>
                     <Image 
@@ -137,21 +134,27 @@ export const Settings = (props) => {
                     <CustomButton 
                         text={"Reset Attractions Data"}
                         action={() => {
-                            props.resetAttractionsData();
+                            resetAttractionsData();
                         }}
                         style={styles.bottomButton}
                     />   
                 </View>
-                <View style={styles.buttonContainer}>
+                {   !gpsPermissionGranted &&
                     <CustomButton 
-                        text={"Sign Out"}
+                        text={"Set Location"}
                         action={() => {
-                            supabase.auth.signOut()
+                            showLocationScreen();
                         }}
                         style={styles.signOutButton}
                     />
-                </View>
-    
+                }
+                <CustomButton 
+                    text={"Sign Out"}
+                    action={() => {
+                        supabase.auth.signOut()
+                    }}
+                    style={styles.signOutButton}
+                />   
                 <Modal 
                     animationType="slide"
                     transparent={true}

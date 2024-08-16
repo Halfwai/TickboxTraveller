@@ -32,7 +32,7 @@ export default function Auth() {
                 setSigningUp
             }        
         }>
-            {signingUp ? <SignUp /> : <SignIn />}            
+            {signingUp ? <SignUp /> : <SignIn />}          
         </AuthContext.Provider>
     )
 }

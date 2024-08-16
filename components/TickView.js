@@ -52,7 +52,6 @@ export const TickView = ({tick}) => {
                         style={[styles.tickImage, {width: windowWidth - 20}]}
                         resizeMode='contain'
                         animationDuration={300}
-                        // resizeMethod='resize'
                     />
                 }
                 { tickData.comment &&

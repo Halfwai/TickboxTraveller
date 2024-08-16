@@ -43,9 +43,9 @@ export const ConfirmTickBox = (props) => {
                 placeholder="Leave a comment"
                 style={styles.input}
                 selectionColor={"black"}
-                containerStyle={{
-                    marginBottom: 0
-                }}
+                // containerStyle={{
+                //     marginBottom: 0
+                // }}
                 inputContainerStyle={{
                     paddingHorizontal: 10,
                     margin: 0,

@@ -60,7 +60,6 @@ export const SignUp = () => {
         return true;
     }
 
-
     return (
         <View style={styles.container}>            
             <View style={styles.headingContainer}>
@@ -81,7 +80,8 @@ export const SignUp = () => {
                         placeholder="Full Name"
                         autoCapitalize={'none'}
                         style={styles.input}
-                        selectionColor={"white"}
+                        selectionColor={"black"}
+                        inputContainerStyle={styles.inputBox}
                     />
                 </View>
                 <View style={styles.inputContainer}>
@@ -92,7 +92,8 @@ export const SignUp = () => {
                         placeholder="email@address.com"
                         autoCapitalize={'none'}
                         style={styles.input}
-                        selectionColor={"white"}
+                        selectionColor={"black"}
+                        inputContainerStyle={styles.inputBox}
                     />
                 </View>
                 <View style={styles.inputContainer}>
@@ -107,7 +108,8 @@ export const SignUp = () => {
                         placeholder="Password"
                         autoCapitalize={'none'}
                         style={styles.input}
-                        selectionColor={"white"}
+                        selectionColor={"black"}
+                        inputContainerStyle={styles.inputBox}
                     />
                 </View>
 
@@ -123,7 +125,8 @@ export const SignUp = () => {
                         placeholder="Password Confirmation"
                         autoCapitalize={'none'}
                         style={styles.input}
-                        selectionColor={"white"}
+                        selectionColor={"black"}
+                        inputContainerStyle={styles.inputBox}
                     />
                 </View>
 
@@ -175,16 +178,17 @@ const styles = StyleSheet.create({
         height: "100%",
     },
     headingContainer: {
-        flex: 1,
+        flex: 0.5,
         width: "100%",
         flexDirection: "row",
         alignItems: "center",
         borderBottomWidth: 2,
         borderColor: 'white',
-        marginTop:20
+        marginTop: 20,
+        paddingBottom: 5
     },
     headingText: {
-        fontSize: 50,
+        fontSize: 25,
         color: "white"
     }, 
     subheadingText: {
@@ -202,7 +206,14 @@ const styles = StyleSheet.create({
         flex: 1
     },
     input: {
-        color: 'white',
+        color: 'black ',
+    },
+    inputBox: {
+        paddingHorizontal: 10,
+        margin: 0,
+        borderBottomWidth: 0,
+        backgroundColor: "white",
+        borderRadius: 10
     },
     imageInputContainer: {
         flexDirection: "row",

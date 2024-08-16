@@ -86,10 +86,10 @@ const styles = StyleSheet.create({
     buttonContainer: {
         width: '33%',
         alignItems: "center",
-        justifyContent: 'center'
     },
     menuButton: {
         alignItems: "center",
+        paddingVertical: 10
     },
     highlightedButton: {
         alignItems: "center",

@@ -9,10 +9,12 @@ import * as React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export const Header = (props) => {
-    const { currentAppState, currentProfileId, session, currentNavigationMap } = useContext(UserContext);
+    const { currentAppState, currentProfileId, currentNavigationMap } = useContext(UserContext);
     const [appState, setAppState] = currentAppState;
     const [profileId, setProfileId] =  currentProfileId;
     const [navigationMap, setNavigationMap] = currentNavigationMap
+
+    const session= props.session
 
     return (
         <View style={styles.headerContainer}>
@@ -38,7 +40,8 @@ export const Header = (props) => {
                 <TouchableOpacity
                     onPress={() => {
                         setProfileId(session?.user.id);
-                        updateAppState("profile", appState, setAppState, navigationMap, setNavigationMap)
+                        props.setScreen("profile");
+                        // updateAppState("profile", appState, setAppState, navigationMap, setNavigationMap)
                     }}
                 >
                     <Image 

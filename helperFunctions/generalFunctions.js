@@ -54,7 +54,10 @@ export const sortAttractions = (attractionsList, location, distanceFormat) => {
         if(distanceFormat == "miles"){
             distanceString = `${(distance * 0.621371).toFixed(2)} miles away`;
         }
-        sortedAttractionsList[i].currentDistance = distanceString;
+        sortedAttractionsList[i] = {
+            ...sortedAttractionsList[i],
+            currentDistance: distanceString
+        };
     }
     return sortedAttractionsList
 }
@@ -84,7 +87,7 @@ export const updateAppState = (newAppState, appState, setAppState, navigationMap
     setNavigationMap(upDatedNavigationMap);
 }
 
-export const getLocationData = async (setLocation, setAskForLocation) => {
+export const getLocationData = async (setLocation, setAskForLocation, setGpsPermissionGranted) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
         const storedLocationData = await checkLocationData()
@@ -100,7 +103,8 @@ export const getLocationData = async (setLocation, setAskForLocation) => {
             })
             return;
         }            
-    }    
+    }
+    setGpsPermissionGranted(true);
     let currentLocation = await Location.getCurrentPositionAsync({});
     setLocation({
         latitude: currentLocation.coords.latitude, 
@@ -182,7 +186,7 @@ export const storeAttractionsData = async (data) => {
         const jsonValue = JSON.stringify(data);
         await AsyncStorage.setItem('attractionData', jsonValue);
     } catch (error) {
-        Alert.alert(error)    
+        Alert.alert(error)
     }
 }
 

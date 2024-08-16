@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     customButton: {
         backgroundColor: "#51A6F5",
         width: "100%",
-        height: 55,
+        height: 40,
         color: "black",
         borderRadius: 10,
         justifyContent: "center",

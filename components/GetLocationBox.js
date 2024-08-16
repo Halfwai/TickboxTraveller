@@ -35,17 +35,18 @@ export const GetLocationBox = () => {
         await setLocation(pickedLocation);
         await setAskForLocation(false);
         storeLocation(pickedLocation);
+        Alert.alert("Location set", "If you wish to change this, you can do so in settings. Better yet, enable location permissions.")
         return
     }
 
     const storeLocation = async (value) => {
         try {
-          const jsonValue = JSON.stringify(value);
-          await AsyncStorage.setItem('setLocation', jsonValue);
+            const jsonValue = JSON.stringify(value);
+            await AsyncStorage.setItem('setLocation', jsonValue);
         } catch (e) {
-          Alert.alert("Error saving location")
+            Alert.alert("Error saving location")
         }
-      };
+    };
 
     return (
         <View style={styles.container}>

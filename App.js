@@ -7,6 +7,15 @@ import * as Font from 'expo-font';
 
 import * as SplashScreen from 'expo-splash-screen';
 
+import { StatusBar } from 'expo-status-bar'
+
+
+// https://github.com/expo/fyi/blob/main/android-navigation-bar-visible-deprecated.md
+import * as NavigationBar from "expo-navigation-bar";
+
+NavigationBar.setPositionAsync("absolute");
+NavigationBar.setBackgroundColorAsync("#00000080"); // `rgba(0,0,0,0.5)`
+
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -57,6 +66,11 @@ export default function App() {
             onLayout={onLayoutRootView}
         >
             {session && session.user ? <MainApp key={session.user.id} session={session} /> : <Auth />}
+            <StatusBar 
+                style="auto"
+                backgroundColor="#1D4A7A"
+            />  
         </View>
+
     )
 }

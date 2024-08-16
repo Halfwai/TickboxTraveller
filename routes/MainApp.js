@@ -16,7 +16,7 @@ import { Search } from '../components/Search';
 import { Settings } from '../components/Settings';
 
 import { getProfile, downloadAttractionsData, getFollowedUserTicks } from '../helperFunctions/supabaseFunctions';
-import { sortAttractions, handleBackAction, getLocationData, checkTimeFormat, checkDistanceFormat, checkStorageAttractionData, storeAttractionsData, deleteAttractionsData  } from '../helperFunctions/generalFunctions';
+import { sortAttractions, handleBackAction, getLocationData, checkTimeFormat, checkDistanceFormat, checkStorageAttractionData, storeAttractionsData, deleteAttractionsData, updateAppState  } from '../helperFunctions/generalFunctions';
 
 export default function MainApp({ session }) {
     const [userData, setUserData] = useState(null);
@@ -34,6 +34,8 @@ export default function MainApp({ session }) {
     const [ timeFormat, setTimeFormat ] = useState(null);
     const [ distanceFormat, setDistanceFormat ] = useState(null);
 
+    const [gpsPermissionGranted, setGpsPermissionGranted] = useState(false);
+
     useEffect(() => {
         if (session) {
             try {
@@ -45,8 +47,9 @@ export default function MainApp({ session }) {
     }, [session])
 
     useEffect(() => {
-        if(location && attractions){
-            setAttractions(sortAttractions(attractions, location, distanceFormat))
+        if(location && attractions){      
+            const newSortedAttractionsList = sortAttractions(attractions, location, distanceFormat)
+            setAttractions(newSortedAttractionsList);
         }
     }, [distanceFormat])
 
@@ -60,7 +63,7 @@ export default function MainApp({ session }) {
         setDistanceFormat(await checkDistanceFormat())
         getProfile(setUserData, session?.user.id);
         getFollowedUserTicks(session?.user.id, setTicksViewData);
-        getLocationData(setLocation, setAskForLocation);
+        getLocationData(setLocation, setAskForLocation, setGpsPermissionGranted);
         setAttractions(await getAttractionData())
     }
 
@@ -114,7 +117,6 @@ export default function MainApp({ session }) {
     return (
         <UserContext.Provider value={
             { 
-                session,
                 currentNavigationMap: [navigationMap, setNavigationMap],
                 currentAppState: [appState, setAppState],
                 currentAttractions: [attractions, setAttractions],
@@ -131,6 +133,10 @@ export default function MainApp({ session }) {
                 <View style={styles.headerContainer}>
                     <Header 
                         profileImage={userData.avatar_signedUrl}
+                        setScreen={(newScreen) => {
+                            updateAppState(newScreen, appState, setAppState, navigationMap, setNavigationMap)
+                        }}
+                        session={session}
                     />
                 </View>
                 <View style={styles.contentContainer}>
@@ -143,6 +149,8 @@ export default function MainApp({ session }) {
                     {appState == "map" && 
                         <Map 
                             attractions={attractions}
+                            location={location}
+                            session={session}
                         />
                     }
                     {appState == "home" && 
@@ -156,12 +164,19 @@ export default function MainApp({ session }) {
                         />
                     }
                     {appState == "search" &&
-                        <Search />
+                        <Search 
+                            session={session}
+                        />
                     } 
                     {appState == "settings" &&
                         <Settings 
                             resetAttractionsData = {() => {
                                 resetAttractions()
+                            }}
+                            gpsPermissionGranted={gpsPermissionGranted}
+                            showLocationScreen={() => {
+                                setAskForLocation(true);
+                                setAttractionsSorted(false);
                             }}
                         />                        
                     }
@@ -198,6 +213,6 @@ const styles = StyleSheet.create({
         flex: 6
     },
     footerContainer: {
-        flex: 1
+        flex: 1.2
     }
 })

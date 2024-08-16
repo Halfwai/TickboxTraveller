@@ -1,4 +1,4 @@
-import { StyleSheet, View, Alert, Image, Text, Pressable, Animated, LayoutAnimation, Modal } from 'react-native'
+import { StyleSheet, View, Alert, Image, Text, Pressable, Animated, LayoutAnimation, Modal, Dimensions } from 'react-native'
 import React, { useState, useRef, useContext } from 'react'
 import { supabase } from '../lib/supabase'
 
@@ -10,7 +10,10 @@ import { CancelTickBox } from './CancelTickBox';
 import { removeImage, saveImageToSupabase } from '../helperFunctions/supabaseFunctions';
 import { storeAttractionsData } from '../helperFunctions/generalFunctions';
 
+import ImageModal from 'react-native-image-modal'
+
 export const TickBoxContainer = (props) => {
+    
     const { currentAttractions } = useContext(UserContext);
     const [ attractions, setAttractions ] = currentAttractions;
 
@@ -20,6 +23,10 @@ export const TickBoxContainer = (props) => {
 
     const [showConfirmModel, setShowConfirmModel] = useState(false);
     const [showCancelModel, setShowCancelModel] = useState(false);
+
+    const [imageResizeMode, setImageResizeMode] = useState("hidden");
+
+    const windowWidth = Dimensions.get('window').width;
 
     const splashOpacity = useRef(new Animated.Value(0)).current;
     const animateSplash = () => {
@@ -127,10 +134,15 @@ export const TickBoxContainer = (props) => {
             )}
 
             <View style={styles.tickBoxElementContainer}>
-                <Image
-                    source={{ uri: props.attraction.url }}
-                    style={styles.attractionImage}
-                />
+                <View style={styles.imageContainer}>
+                    <ImageModal
+                        source={{ uri: props.attraction.url }}
+                        style={[styles.attractionImage, {width: props.imageWidth}]}
+                        resizeMode={"hidden"}
+                        modalImageResizeMode={"contain"}
+                    />
+                </View>
+
                 <Animated.Image 
                     source={require("../assets/images/tickSplash.png")}
                     style={[styles.tickBoxAnimation, {opacity: splashOpacity}]}
@@ -143,9 +155,9 @@ export const TickBoxContainer = (props) => {
                         } else {
                             setShowCancelModel(true)
                         }
-                        
                     }}
                     disabled={tickBoxDisabled}
+                    style={styles.tickBoxPressable}
                 >
                     <Image 
                         source={isChecked ? require("../assets/images/tickedBox.png") : require("../assets/images/unTickedBox.png")} 
@@ -236,7 +248,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         width: "100%",
         justifyContent: "flex-end",
-        paddingVertical: 15,
+        paddingVertical: 0,
         borderBottomColor: "#51A6F5",
         borderBottomWidth: 1
     }, 
@@ -244,17 +256,22 @@ const styles = StyleSheet.create({
         fontSize: 30,
         paddingRight: 10
     },
+    imageContainer: {
+        height: 80
+    },
     attractionImage: {
-        width: "100%",
         height: 80,
-        position: "absolute"
+        
     },
     tickBox: {
         height: 50,
         width: 50,
         color: "#51A6F5",
         marginRight: 30
-        
+    },
+    tickBoxPressable: {
+        position: "absolute",
+        top: 15        
     },
     tickBoxAnimation: {
         height: 100,
