@@ -12,7 +12,10 @@ import { updateAttractions } from '../helperFunctions/generalFunctions';
 // Uses Image Modal library - https://www.npmjs.com/package/react-native-image-modal
 import ImageModal from 'react-native-image-modal'
 
-// This component displays 
+// This component displays a tickbox for the user to tick off the attraction. It takes twp props, the attraction,
+// and the width that the image will be. Two different screens use this component, the map screen and the log 
+//screen, and they have different requirements in terms of how wide the attraction image should be. It also gets two 
+// objects from UserContext. I did this to avoid prop drilling.
 export const TickBoxContainer = ({ attraction, imageWidth }) => {    
     const { currentAttractions, session } = useContext(UserContext);
     const [ attractions, setAttractions ] = currentAttractions;
@@ -24,6 +27,7 @@ export const TickBoxContainer = ({ attraction, imageWidth }) => {
     const [showConfirmModel, setShowConfirmModel] = useState(false);
     const [showCancelModel, setShowCancelModel] = useState(false);
 
+    // This code animated the tickbox and makes an star flash behind it when the tickbox is ticked
     const splashOpacity = useRef(new Animated.Value(0)).current;
     const animateSplash = () => {
         setTickBoxDisabled(true);
@@ -89,7 +93,6 @@ export const TickBoxContainer = ({ attraction, imageWidth }) => {
                         modalImageResizeMode={"contain"}
                     />
                 </View>
-
                 <Animated.Image 
                     source={require("../assets/images/tickSplash.png")}
                     style={[styles.tickBoxAnimation, {opacity: splashOpacity}]}
@@ -112,6 +115,9 @@ export const TickBoxContainer = ({ attraction, imageWidth }) => {
                     />
                 </Pressable>
             </View>
+            {/* There are two Modal overlays for this component. One shows when the user ticks a box to 
+            allow them to add a comment and a picture, one shows when a tickbox is aalready ticked to confirm they
+            want to delete the tick */}
             <Modal
                 animationType="slide"
                 transparent={true}

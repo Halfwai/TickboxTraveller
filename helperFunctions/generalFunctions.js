@@ -6,7 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { manipulateAsync,  SaveFormat } from 'expo-image-manipulator';
 
-
+// Allows the user to upload an image from their device. 
+// Code adapted from here- https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native
 export async function uploadImage() {
     try {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -40,7 +41,7 @@ export async function uploadImage() {
 }
 
 
-
+// Sorts the attractions by distance from the users location. Uses the geolib library
 export const sortAttractions = (attractionsList, location, distanceFormat) => {
     let sortedAttractionsList = [...attractionsList];
     sortedAttractionsList = orderByDistance(location, sortedAttractionsList);
@@ -219,4 +220,16 @@ export function updateAttractions(attractions, updatedAttractionId, bool){
     })
     storeAttractionsData(updatedAttractions)
     return updatedAttractions;
+}
+
+export const formatTime = (timeStamp, timeFormat) => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const date = new Date(timeStamp)
+    const timeFormatStyle = timeFormat == "12h" ? "en-US" : "en-UK"
+    const currentDate = new Intl.DateTimeFormat(timeFormatStyle, {
+        dateStyle: 'full',
+        timeStyle: 'short',
+        timeZone: timezone,
+    }).format(date)
+    return currentDate
 }

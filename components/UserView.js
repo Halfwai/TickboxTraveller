@@ -5,20 +5,24 @@ import { CustomButton } from "./GenericComponents";
 
 import { AvatarImage } from "./AvatarImage";
 
-export const UserView = (props) => {
-    const user = props.user.item;
+// This component displays data on a user on the search screen. Takes three props, the user object, the id of the current user
+// and the action function which sets the ID for the proile to be displayed and shows the profile page.
+export const UserView = ({user, sessionId, action}) => {
+    const user = user.item;
 
-    if (props.sessionId == user.id){
+    // if the user found in search is the current user, then no UserView is shown for themself.
+    if (sessionId == user.id){
         return
     }
 
+    // Tracks whether the current user if following this user and gives them the option to either follow or unfollow
     const [isFollowing, setIsFollowing] = useState(user.is_following) 
 
     return(
         <View style={styles.userContainer}>
             <TouchableOpacity style={styles.touchableContainer}
                 onPress={() => {
-                    props.action();
+                    action();
                 }}
             >
                 <AvatarImage
@@ -33,9 +37,9 @@ export const UserView = (props) => {
                 text={isFollowing ? "Following" : "Follow"}
                 action={() => {
                     if(isFollowing){
-                        removeFollow(props.sessionId, user.id);
+                        removeFollow(sessionId, user.id);
                     } else {
-                        insertFollow(props.sessionId, user.id);
+                        insertFollow(sessionId, user.id);
                     }
                     setIsFollowing(!isFollowing);
                 }}

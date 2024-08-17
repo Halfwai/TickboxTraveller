@@ -1,10 +1,12 @@
-import { TouchableOpacity, Text, StyleSheet, Animated, View, TextInput } from 'react-native'
+import { TouchableOpacity, Text, StyleSheet, Animated, View } from 'react-native'
 import { useRef } from 'react';
 
-export const ToggleButton = (props) => {
-    const highlightBoxPosition = useRef(new Animated.Value(props.startPosition)).current;
+// Animated toggle button component. Takes 4 props, the position the toggle starts at, the title for the button, and
+// two objects with options for the left and right side of the toggle.
+export const ToggleButton = ({startPosition, title, left, right}) => {
+    const highlightBoxPosition = useRef(new Animated.Value(startPosition)).current;
+    //Moves the toggle to the right hand side
     const moveRight = () => {
-        // Will change fadeAnim value to 1 in 5 seconds
         Animated.timing(highlightBoxPosition, {
           toValue: 0,
           duration: 200,
@@ -12,8 +14,8 @@ export const ToggleButton = (props) => {
         }).start();
     };
 
+    // Moves the toggle to the left hand side
     const moveLeft = () => {
-        // Will change fadeAnim value to 1 in 5 seconds
         Animated.timing(highlightBoxPosition, {
           toValue: 80,
           duration: 200,
@@ -22,26 +24,26 @@ export const ToggleButton = (props) => {
     };
     return (
         <View style={styles.settingContainer}>
-            <Text>{props.title}</Text>
+            <Text>{title}</Text>
             <View style={styles.toggleContainer}>
                 <Animated.View style={[styles.toggleHighlight, {right: highlightBoxPosition}]}></Animated.View>
                 <TouchableOpacity
                     style={styles.toggleButton}
                     onPress={() => {
                         moveLeft();
-                        props.left.action();
+                        left.action();
                     }}
                 >
-                    <Text>{props.left.option}</Text>
+                    <Text>{left.option}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.toggleButton}
                     onPress={() => {
                         moveRight();
-                        props.right.action();
+                        right.action();
                     }}
                 >
-                    <Text>{props.right.option}</Text>
+                    <Text>{right.option}</Text>
                 </TouchableOpacity>   
             </View>
         </View>

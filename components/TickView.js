@@ -1,30 +1,35 @@
 import { StyleSheet, View, Image, Text, Dimensions } from 'react-native'
-import { useState, useEffect, useMemo, useContext } from 'react'
+import { useMemo, useContext } from 'react'
 import { UserContext } from '../context/Context';
+import { formatTime } from '../helperFunctions/generalFunctions';
 
 import { AvatarImage } from './AvatarImage'
 
 import ImageModal from 'react-native-image-modal'
 
+//This component displays a completed tick. It shows some information on the user that has ticked off an attraction, and
+// the picture and comment from the thick if the user added one. It takes the user as a prop, and also grabs the currentTimeView
+// state from UserContext to format the time stamp.
 export const TickView = ({tick}) => {
     const { currentTimeFormat } = useContext(UserContext);
     const [ timeFormat ] = currentTimeFormat;
-    let formatTime = () => {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const date = new Date(tickData.updated_at)
-        const timeFormatStyle = timeFormat == "12h" ? "en-US" : "en-UK"
-        const currentDate = new Intl.DateTimeFormat(timeFormatStyle, {
-            dateStyle: 'full',
-            timeStyle: 'short',
-            timeZone: timezone,
-          }).format(date)
-        return currentDate
-    }
+    // let formatTime = () => {
+    //     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    //     const date = new Date(tickData.updated_at)
+    //     const timeFormatStyle = timeFormat == "12h" ? "en-US" : "en-UK"
+    //     const currentDate = new Intl.DateTimeFormat(timeFormatStyle, {
+    //         dateStyle: 'full',
+    //         timeStyle: 'short',
+    //         timeZone: timezone,
+    //       }).format(date)
+    //     return currentDate
+    // }
     let tickData = tick.item;
     const date = useMemo(() => {
-        return formatTime()
+        return formatTime(tickData.updated_at, timeFormat)
     })
 
+    // The ImageModel component needs a width in pixels to display properly, this line of code returns the window witdth for this.
     const windowWidth = Dimensions.get('window').width;
 
     return (
@@ -98,9 +103,4 @@ const styles = StyleSheet.create({
     commentBox: {        
         padding: 20,
     },
-    imageCommentContainer: {
-        // borderRadius: 10,
-        // borderWidth: 1,
-        // borderColor: "#51A6F5"
-    }
 })
