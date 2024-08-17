@@ -30,8 +30,10 @@ export const TickView = ({tick}) => {
     return (
         <View style={styles.tickInfoContainer}>
             <View style={styles.topContainer}>
-                <AvatarImage 
-                    data={tickData}
+                <AvatarImage
+                    full_name={tickData.full_name}
+                    signedUrl={tickData.avatar_signedUrl}
+                    size={55}
                 />
                 <View style={{flexShrink: 1}}>
                     <Text style={styles.tickText}>

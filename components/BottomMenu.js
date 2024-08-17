@@ -1,25 +1,18 @@
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-
-import { UserContext } from '../context/Context'
-import React, { useContext  } from 'react'
-
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import { updateAppState } from "../helperFunctions/generalFunctions";
-
-export function BottomMenu(){
-    const { currentAppState, currentNavigationMap } = useContext(UserContext);
-    const [appState, setAppState] = currentAppState
-    const [navigationMap, setNavigationMap] = currentNavigationMap
-
+// This compnent displays the navigation menu on the bottom of the screen. It takes two props, setScreen is a function that updates a state variable to change the screen displayed,
+// and updates an array with the latest screen for back button functionality. The appState prop is the current screen that the app is on so that the right button is highlighted.
+export function BottomMenu({setScreen, appState}){
+    // Component specific to this screen for the menu buttons. Take 4 props. icon, the name of the font-awesome icon to appear, action, the function to change the app screen displayed, 
+    // text, the text to show with the button and highlighed, a boolean to show whether the button should be highlighted
     const MenuButton = (props) => {
         return (
             <View 
                 style={styles.buttonContainer}
-                {...props}
             >
-                <TouchableOpacity 
-                    
+                <TouchableOpacity
+                    // changes the styling on the button depending on if it is the current app screen 
                     style={props.highlighted ? styles.highlightedButton : styles.menuButton}
                     onPress={() => {
                         props.action()
@@ -37,12 +30,13 @@ export function BottomMenu(){
         )
     }
 
+    // Contains five menu buttons for the main app pages
     return (
         <View style={styles.menuButtonsContainer}>
             <MenuButton 
                 icon={'home'}
                 action={() => (
-                    updateAppState('home', appState, setAppState, navigationMap, setNavigationMap)
+                    setScreen("home")
                 )}
                 text={'Home'}
                 highlighted={appState == "home"}
@@ -50,7 +44,7 @@ export function BottomMenu(){
             <MenuButton 
                 icon={'map'}
                 action={() => (
-                    updateAppState('map', appState, setAppState, navigationMap, setNavigationMap)
+                    setScreen("map")
                 )}
                 text={'Map'}
                 highlighted={appState == "map"}
@@ -58,7 +52,7 @@ export function BottomMenu(){
             <MenuButton 
                 icon={'check-square-o'}
                 action={() => (
-                    updateAppState('log ticks', appState, setAppState, navigationMap, setNavigationMap)
+                    setScreen("log ticks")
                 )}
                 text={'Log Ticks'}
                 highlighted={appState == "log ticks"}
@@ -66,10 +60,18 @@ export function BottomMenu(){
             <MenuButton 
                 icon={'search'}
                 action={() => (
-                    updateAppState('search', appState, setAppState, navigationMap, setNavigationMap)
+                    setScreen("search")
                 )}
                 text={'Search'}
                 highlighted={appState == "search"}
+            />
+            <MenuButton 
+                icon={'cog'}
+                action={() => (
+                    setScreen("settings")
+                )}
+                text={'Settings'}
+                highlighted={appState == "settings"}
             />
         </View>
     )
@@ -79,12 +81,14 @@ const styles = StyleSheet.create({
     menuButtonsContainer:{
         flexDirection: "row",
         justifyContent: "space-evenly",
+        alignItems: "cneter",
         height: "100%",
         padding: 5,
         backgroundColor: "#1D4A7A",
+        paddingHorizontal: 10
     },
     buttonContainer: {
-        width: '33%',
+        width: '20%',
         alignItems: "center",
     },
     menuButton: {
@@ -94,18 +98,17 @@ const styles = StyleSheet.create({
     highlightedButton: {
         alignItems: "center",
         backgroundColor: "rgba(0, 0, 0, 0.5)",
+        width: "100%",
         paddingVertical: 10,
-        paddingHorizontal: 20,
         borderRadius: 10,
     },
     menuIcon: {
         fontSize: 40,
         color: "white"
-
     },
     menuText: {
         color: 'white',
+        textAlign: 'center',
+        fontSize: 12
     }
-
-
 })

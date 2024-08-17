@@ -1,11 +1,11 @@
 import { StyleSheet, View, Text, TouchableOpacity, Button, FlatList } from "react-native";
 import { useState, useEffect, useMemo, useContext } from 'react'
-import { supabase } from '../lib/supabase'
-import { UserContext } from "../context/Context";
-import { TickView } from "./TickView";
+import { supabase } from '../../lib/supabase'
+import { UserContext } from "../../context/Context";
+import { TickView } from "../../components/TickView";
 
-import { checkStorageAttractionData } from "../helperFunctions/generalFunctions";
-import { getAttractionsData } from "../helperFunctions/supabaseFunctions";
+import { checkStorageAttractionData } from "../../helperFunctions/generalFunctions";
+import { getAttractionsData } from "../../helperFunctions/supabaseFunctions";
 
 
 

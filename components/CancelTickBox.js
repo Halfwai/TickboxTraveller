@@ -1,32 +1,32 @@
 import { StyleSheet, View, Text } from 'react-native'
 import { CustomButton } from './GenericComponents';
 
-export const CancelTickBox = (props) => {
+// This component displays a modal overlay that checks if the user wants to cancel/delete a tick that they have previously made. It takes three props, the attraction name
+// a function to hide the modal and a function that removes the tick from the database.
+export const CancelTickBox = ({attractionName, hide, removeTick}) => {
     return (
         <View 
-            {...props}
             style={styles.container}
         >
             <View style={styles.headingContainer}>
-                {/* <Text style={styles.congratText}>Congratulations</Text> */}
-                <Text>{`Are you sure you want to cancel your tick for ${props.attraction.name}?`}</Text>
+                <Text>{`Are you sure you want to cancel your tick for ${attractionName}?`}</Text>
             </View>
             
             <View style={styles.buttonContainer}>
                 <CustomButton 
                     action={() => {
-                        props.hide()
+                        hide()
                     }}
                     text={"Back"}
-                    style={{width: "45%"}}
+                    style={styles.button}
                 />
                 <CustomButton 
                     action={() => {
-                        props.removeTick()
-                        props.hide()
+                        removeTick()
+                        hide()
                     }}
-                    text={"Confirm Cancelation"}
-                    style={{width: "45%"}}
+                    text={"Confirm Cancellation"}
+                    style={styles.button}
                 />
             </View>            
         </View>
@@ -58,12 +58,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         padding: 10
     },
-    image: {
-        
-    },
     buttonContainer: {
         flexDirection: "row",
         padding: 10,
         justifyContent: "space-between"
+    },
+    button: {
+        width: "45%", 
+        height: 50
     }
 })

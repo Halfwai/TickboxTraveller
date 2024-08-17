@@ -1,15 +1,19 @@
 import { StyleSheet, View, Text, Image } from "react-native";
 
-export const AvatarImage = (props) => {
+// This component will display a circular image for the users avatar if they have uploaded one. If not, it will display a black circle with the first letter
+// of their full name. It takes a full_name and avatar_signedUrl as props.
+export const AvatarImage = ({full_name, signedUrl, size}) => {
     return (
-        <View style={styles.avatarContainer}>
-        { props.data.avatar_url ?
+        <View style={[styles.avatarContainer, {height: size, width: size}] }>
+        {/* if the user object avatar_url value is not null it will display the image */}
+        { signedUrl ?
             <Image
-                style={styles.tickProfileImage}
-                source={{uri: props.data.avatar_signedUrl}}
+                style={styles.avatarImage}
+                source={{uri: signedUrl}}
             /> :
-            <Text style={styles.imageReplacementText}>
-                {props.data.full_name[0]}
+            // otherwise it will dispay a black circle with the first letter of the users name in it.
+            <Text style={styles.avatarReplacementText}>
+                {full_name[0]}
             </Text>
         }  
         </View>
@@ -20,18 +24,16 @@ const styles = StyleSheet.create({
     avatarContainer: {
         alignItems: "center",
         justifyContent: "center",
-        height: 52,
-        width: 52,
         marginRight: 10,
         backgroundColor: "black",
-        borderRadius: 25,
+        borderRadius: 40,
         borderWidth: 2,
         borderColor: "#51A6F5"
     },
-    tickProfileImage: {
-        height: 50,
-        width: 50,
-        borderRadius: 25,                   
+    avatarImage: {
+        height: "99%",
+        width: "99%",
+        borderRadius: 40,                   
     },
     imageReplacementText: {
         color: "white",

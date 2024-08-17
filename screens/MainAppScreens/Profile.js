@@ -1,10 +1,10 @@
 import { StyleSheet, View, Text, Image, FlatList } from "react-native";
 import { useState, useEffect, useContext } from 'react'
-import { TickView } from "./TickView";
+import { TickView } from "../../components/TickView";
 
-import { getProfile, getTicksData, getImageUrl } from '../helperFunctions/supabaseFunctions';
+import { getProfile, getTicksData, getImageUrl } from '../../helperFunctions/supabaseFunctions';
 
-import { UserContext } from '../context/Context'
+import { UserContext } from '../../context/Context'
 
 export const Profile = () => {
     const [ticksData, setTicksData] = useState(null);

@@ -2,9 +2,9 @@ import React, { useContext, useState }from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { StyleSheet, View, Dimensions } from 'react-native';
 
-import { UserContext } from '../context/Context'
+import { UserContext } from '../../context/Context'
 
-import { TickBoxContainer } from './TickBoxContainer'
+import { TickBoxContainer } from '../../components/TickBoxContainer'
 
 export function Map(props) {
     const windowWidth = Dimensions.get('window').width;
@@ -42,20 +42,20 @@ export function Map(props) {
                         coordinate={attraction}
                         icon={
                             attraction.type == "nature" ?
-                            require(`../assets/mapIcons/nature.png`) :
+                            require(`../../assets/mapIcons/nature.png`) :
                             attraction.type == "adventure" ?
-                            require(`../assets/mapIcons/adventure.png`) :
+                            require(`../../assets/mapIcons/adventure.png`) :
                             attraction.type == "cultural" ?
-                            require(`../assets/mapIcons/cutural.png`) :
+                            require(`../../assets/mapIcons/cutural.png`) :
                             attraction.type == "entertainment" ?
-                            require(`../assets/mapIcons/entertainment.png`) :
+                            require(`../../assets/mapIcons/entertainment.png`) :
                             attraction.type == "festival" ?
-                            require(`../assets/mapIcons/festival.png`) :
+                            require(`../../assets/mapIcons/festival.png`) :
                             attraction.type == "food" ?
-                            require(`../assets/mapIcons/food.png`) :
+                            require(`../../assets/mapIcons/food.png`) :
                             attraction.type == "historic" ?
-                            require(`../assets/mapIcons/history.png`) :
-                            require(`../assets/mapIcons/shopping.png`)
+                            require(`../../assets/mapIcons/history.png`) :
+                            require(`../../assets/mapIcons/shopping.png`)
                         }
                         onPress={() => {                            
                             setupAttractionBox(attraction);

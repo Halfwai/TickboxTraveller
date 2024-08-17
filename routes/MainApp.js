@@ -2,18 +2,18 @@ import { useState, useEffect, useMemo } from 'react'
 import { StyleSheet, View, BackHandler, Button } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 
-import { UserContext, LocationContext } from '../context/Context'
+import { UserContext } from '../context/Context'
 
 import * as React from 'react';
-import { LogScreen } from '../components/LogScreen';
+import { LogScreen } from '../screens/MainAppScreens/LogScreen';
 import { BottomMenu } from '../components/BottomMenu';
-import { Map } from '../components/Map';
-import { GetLocationBox } from '../components/GetLocationBox';
+import { Map } from '../screens/MainAppScreens/Map';
+import { GetLocationScreen } from '../components/GetLocationScreen';
 import { Header } from '../components/Header';
-import { Home } from '../components/Home';
-import { Profile } from '../components/profile';
-import { Search } from '../components/Search';
-import { Settings } from '../components/Settings';
+import { Home } from '../screens/MainAppScreens/Home';
+import { Profile } from '../screens/MainAppScreens/Profile';
+import { Search } from '../screens/MainAppScreens/Search';
+import { Settings } from '../screens/MainAppScreens/Settings';
 
 import { getProfile, downloadAttractionsData, getFollowedUserTicks } from '../helperFunctions/supabaseFunctions';
 import { sortAttractions, handleBackAction, getLocationData, checkTimeFormat, checkDistanceFormat, checkStorageAttractionData, storeAttractionsData, deleteAttractionsData, updateAppState  } from '../helperFunctions/generalFunctions';
@@ -94,14 +94,16 @@ export default function MainApp({ session }) {
 
     if(askForLocation){
         return (
-            <LocationContext.Provider value={
-                {
-                    setLocation,
-                    setAskForLocation
-                }
-            }>
-                <GetLocationBox />
-            </LocationContext.Provider>
+
+            <GetLocationScreen 
+                setLocation={(location) => {
+                    setLocation(location)
+                }}
+                setAskForLocation={(bool) => {
+                    setAskForLocation(bool)
+                }}
+            />
+
         )
     }
             
@@ -117,6 +119,7 @@ export default function MainApp({ session }) {
     return (
         <UserContext.Provider value={
             { 
+                session,
                 currentNavigationMap: [navigationMap, setNavigationMap],
                 currentAppState: [appState, setAppState],
                 currentAttractions: [attractions, setAttractions],
@@ -131,12 +134,13 @@ export default function MainApp({ session }) {
         }>
             <View style={styles.container}>
                 <View style={styles.headerContainer}>
-                    <Header 
-                        profileImage={userData.avatar_signedUrl}
-                        setScreen={(newScreen) => {
+                    <Header
+                        user={userData} 
+                        setScreen={async (newScreen) => {
+                            await setProfileId(session.user.id);
                             updateAppState(newScreen, appState, setAppState, navigationMap, setNavigationMap)
                         }}
-                        session={session}
+                        appState={appState}
                     />
                 </View>
                 <View style={styles.contentContainer}>
@@ -182,7 +186,12 @@ export default function MainApp({ session }) {
                     }
                 </View>
                 <View style={styles.footerContainer}>
-                    <BottomMenu />
+                    <BottomMenu 
+                        setScreen={(newScreen) => {
+                            updateAppState(newScreen, appState, setAppState, navigationMap, setNavigationMap)
+                        }}
+                        appState={appState}
+                    />
                 </View>
                 <StatusBar style="auto" />
             </View>

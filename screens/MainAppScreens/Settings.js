@@ -1,11 +1,11 @@
 import { StyleSheet, View, Text, Image, TextInput, ScrollView, Modal, TouchableOpacity } from "react-native";
-import { UserContext } from '../context/Context'
+import { UserContext } from '../../context/Context'
 import { useContext, useState, useEffect, useRef } from 'react'
-import { CustomButton, ToggleButton } from "./GenericComponents";
-import { saveTimeFormat, saveDistanceFormat, uploadImage, deleteAttractionsData } from "../helperFunctions/generalFunctions";
-import { updateProfile, getProfile } from "../helperFunctions/supabaseFunctions"
-import { supabase } from '../lib/supabase'
-import { Input } from './Input'
+import { CustomButton, Input } from "../../components/GenericComponents";
+import { ToggleButton } from "../../components/ToggleButton";
+import { saveTimeFormat, saveDistanceFormat, uploadImage } from "../../helperFunctions/generalFunctions";
+import { updateProfile, getProfile } from "../../helperFunctions/supabaseFunctions"
+import { supabase } from '../../lib/supabase'
 
 export const Settings = ({resetAttractionsData, gpsPermissionGranted, showLocationScreen}) => {
     const { currentUserData, currentTimeFormat, currentDistanceFormat, currentAttractions } = useContext(UserContext)
@@ -164,7 +164,7 @@ export const Settings = ({resetAttractionsData, gpsPermissionGranted, showLocati
                         <View style={styles.modelBox}>
                             <View style={styles.headingContainer}>
                                 <Image 
-                                        source={require("../assets/images/icon.png")}
+                                        source={require("../../assets/images/icon.png")}
                                         style={styles.logo}
                                         resizeMode='contain'
                                 />

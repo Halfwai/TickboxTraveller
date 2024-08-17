@@ -4,24 +4,29 @@ import { CustomButton } from './GenericComponents';
 import { Input } from '@rneui/themed'
 import { uploadImage } from '../helperFunctions/generalFunctions';
 
-
-export const ConfirmTickBox = (props) => {
+// This component displays a modal that allows the user to confirm ticking off a box. It also allows them to add comments and an image to the tick if they wish. It takes four 
+// props, the name of the attraction, and three functions that remove the tick, insert it into the database, and hide the modal
+export const ConfirmTickBox = ({attractionName, removeTick, insertTick, hide}) => {
+    // This code displays a gif of firewords for just over 4 seconds when the user first ticks the box
     const [showFireWorks, setShowFireWorks] = useState(true);
     setTimeout(() => {
         setShowFireWorks(false)
     }, 4100);
 
+    // set up component states
     const [commentText, setCommentText] = useState("");
     const [imageUrl, setImageUrl] = useState(null);
     const [uploading, setUploading] = useState(false);
 
+    // async fuction allows the upload image button be be disabled while the image is uploading
     const uploadTickImage = async () =>{
+        setUploading(true)
         setImageUrl(await uploadImage())
+        setUploading(false)
     }
 
     return (
-        <View 
-            {...props}
+        <View
             style={styles.container}
         >
             { showFireWorks &&
@@ -34,25 +39,18 @@ export const ConfirmTickBox = (props) => {
             }
             <View style={styles.headingContainer}>
                 <Text style={styles.congratText}>Congratulations</Text>
-                <Text>{`for ticking off ${props.attraction.name}`}</Text>
+                <Text>{`for ticking off ${attractionName}`}</Text>
             </View>
             <Input
                 leftIcon={ commentText == "" && { type: 'font-awesome', name: 'comment', color: 'white' }}
-                onChangeText={(text) => setCommentText(text)}
+                onChangeText={(text) => {
+                    setCommentText(text)
+                }}
                 value={commentText}
                 placeholder="Leave a comment"
                 style={styles.input}
                 selectionColor={"black"}
-                // containerStyle={{
-                //     marginBottom: 0
-                // }}
-                inputContainerStyle={{
-                    paddingHorizontal: 10,
-                    margin: 0,
-                    borderBottomWidth: 0,
-                    backgroundColor: "lightgray",
-                    borderRadius: 10
-                }}
+                inputContainerStyle={styles.inputContainer}
                 multiline
             />
             <View style={styles.imageContainer}>
@@ -68,22 +66,22 @@ export const ConfirmTickBox = (props) => {
                         uploadTickImage()
                     }}
                     text={uploading ? 'Uploading ...' : 'Upload a picture'}
-                    // style={{width: "90%"}}
+                    disabled={uploading}
                 />
             </View>
             <View style={styles.buttonContainer}>
                 <CustomButton 
                     action={() => {
-                        props.removeTick()
-                        props.hide()
+                        removeTick()
+                        hide()
                     }}
                     text={"Cancel Tick"}
                     style={{width: "45%"}}
                 />
                 <CustomButton 
                     action={() => {
-                        props.insertTick(imageUrl, commentText);
-                        props.hide()
+                        insertTick(imageUrl, commentText);
+                        hide()
                     }}
                     text={"Confirm Tick"}
                     style={{width: "45%"}}
@@ -124,8 +122,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         padding: 10
     },
-    image: {
-        
+    inputContainer: {
+        paddingHorizontal: 10,
+        margin: 0,
+        borderBottomWidth: 0,
+        backgroundColor: "lightgray",
+        borderRadius: 10
     },
     buttonContainer: {
         flexDirection: "row",

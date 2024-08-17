@@ -1,10 +1,10 @@
 import React, { useState, useContext  } from 'react'
 import { Alert, StyleSheet, View, Image, Text } from 'react-native'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabase'
 import { Input } from '@rneui/themed'
 
-import { AuthContext } from '../context/Context'
-import { CustomButton } from './GenericComponents'
+import { AuthContext } from '../../context/Context'
+import { CustomButton } from '../../components/GenericComponents'
 
 
 export const SignIn = () => {
@@ -28,7 +28,7 @@ export const SignIn = () => {
         <View style={styles.container}>            
             <View style={styles.headingContainer}>
                 <Image 
-                    source={require("../assets/images/icon.png")}
+                    source={require("../../assets/images/icon.png")}
                     style={styles.logo}
                     resizeMode='contain'
                 />

@@ -1,14 +1,12 @@
 import React, { useState, useContext  } from 'react'
 import { Alert, StyleSheet, View, Image, Text } from 'react-native'
-import { supabase } from '../lib/supabase'
 import { Input } from '@rneui/themed'
-import * as ImagePicker from 'expo-image-picker'
 
-import { AuthContext } from '../context/Context'
-import { CustomButton } from './GenericComponents'
+import { AuthContext } from '../../context/Context'
+import { CustomButton } from '../../components/GenericComponents'
 
-import { signUpWithEmail } from '../helperFunctions/supabaseFunctions'
-import { uploadImage } from '../helperFunctions/generalFunctions'
+import { signUpWithEmail } from '../../helperFunctions/supabaseFunctions'
+import { uploadImage } from '../../helperFunctions/generalFunctions'
 
 
 
@@ -64,7 +62,7 @@ export const SignUp = () => {
         <View style={styles.container}>            
             <View style={styles.headingContainer}>
                 <Image 
-                    source={require("../assets/images/icon.png")}
+                    source={require("../../assets/images/icon.png")}
                     style={styles.logo}
                     resizeMode='contain'
                 />

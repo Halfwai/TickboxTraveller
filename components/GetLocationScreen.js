@@ -1,12 +1,10 @@
 import { StyleSheet, View, Alert, Text } from 'react-native'
-import { useState, useContext } from 'react'
-
-import { LocationContext } from '../context/Context'
+import { useState } from 'react'
 
 import { CustomButton } from './GenericComponents'
+import { storeLocation } from '../helperFunctions/generalFunctions';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+// uses the country-city-location library to get a list of countries and cities https://www.jsdelivr.com/package/npm/country-city-location
 import {
     countries,
     getCitiesByCountryCode,
@@ -14,7 +12,8 @@ import {
 
 import { Dropdown } from 'react-native-element-dropdown';
 
-updatedCountries = countries.map((country) => {
+// Updates the name of Taiwan
+const updatedCountries = countries.map((country) => {
     if(country.Name == "Taiwan, Province of China"){
         return {
             ...country,
@@ -24,13 +23,13 @@ updatedCountries = countries.map((country) => {
     return country;
 })
 
-
-export const GetLocationBox = () => {
-    const {setLocation, setAskForLocation } = useContext(LocationContext)
+// This component displays a screen to get the location of the user if they deny location permissions. Takes two props, one that sets the location of the user, and one that controls the display of this screen
+export const GetLocationScreen = ({setLocation, setAskForLocation}) => {
     const [ pickedLocation, setPickedLocation ] = useState(null);
 
     const [cityList, setCityList] = useState([]);
 
+    // async function that sets the location to the one picked by the user and returns the user to the main app
     const setValues = async () => {
         await setLocation(pickedLocation);
         await setAskForLocation(false);
@@ -38,15 +37,6 @@ export const GetLocationBox = () => {
         Alert.alert("Location set", "If you wish to change this, you can do so in settings. Better yet, enable location permissions.")
         return
     }
-
-    const storeLocation = async (value) => {
-        try {
-            const jsonValue = JSON.stringify(value);
-            await AsyncStorage.setItem('setLocation', jsonValue);
-        } catch (e) {
-            Alert.alert("Error saving location")
-        }
-    };
 
     return (
         <View style={styles.container}>
@@ -65,6 +55,7 @@ export const GetLocationBox = () => {
                             latitude: parseFloat(item.Latitude),
                             longitude: parseFloat(item.Longitude)
                         })
+                        // displays cities list for more accuracy once a country has been picked
                         setCityList(getCitiesByCountryCode(item.Alpha2Code));
                     }}
                 />
@@ -83,9 +74,7 @@ export const GetLocationBox = () => {
                 />
                 <CustomButton 
                     action={() => {
-                        // console.log(setLocation)
                         setValues();
-
                     }}
                     text={"Set Location"}
                     disabled={pickedLocation == null}

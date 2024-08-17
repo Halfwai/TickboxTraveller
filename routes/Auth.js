@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { AppState } from 'react-native'
 import { supabase } from '../lib/supabase'
 
-import { SignIn } from '../components/SignIn'
-import { SignUp } from '../components/SignUp'
+import { SignIn } from '../screens/AuthScreens/SignIn'
+import { SignUp } from '../screens/AuthScreens/SignUp'
 
 import { AuthContext } from '../context/Context'
 

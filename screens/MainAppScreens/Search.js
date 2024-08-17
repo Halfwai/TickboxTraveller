@@ -4,12 +4,12 @@ import RadioGroup from 'react-native-radio-buttons-group';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import { getUserData } from '../helperFunctions/supabaseFunctions';
-import { updateAppState } from '../helperFunctions/generalFunctions';
+import { getUserData } from '../../helperFunctions/supabaseFunctions';
+import { updateAppState } from '../../helperFunctions/generalFunctions';
 
-import { UserView } from './UserView';
+import { UserView } from '../../components/UserView';
 
-import { UserContext } from '../context/Context'
+import { UserContext } from '../../context/Context'
 
 export const Search = (props) => {
     const radioButtons = useMemo(() => ([
@@ -82,18 +82,6 @@ export const Search = (props) => {
                     />
 
                 }
-
-
-
-                {/* { userData &&
-                    userData.map((user) => {
-                        if (user.id != session.user.id){
-                            return (
-                                   
-                            )  
-                        }
-                    })
-                } */}
             </View>
         </View>
     )

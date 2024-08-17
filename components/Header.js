@@ -1,56 +1,41 @@
-import { useState, useEffect, useContext, useRef } from 'react'
-import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
 
-import { UserContext } from '../context/Context'
-import { updateAppState } from '../helperFunctions/generalFunctions';
+import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
+import { AvatarImage } from './AvatarImage';
 
 import * as React from 'react';
 
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-
+// Conponent for the header. Takes three props. The the user, a function to set the id for the profile to be displayed and shows the profile page, and the name of the current screen 
 export const Header = (props) => {
-    const { currentAppState, currentProfileId, currentNavigationMap } = useContext(UserContext);
-    const [appState, setAppState] = currentAppState;
-    const [profileId, setProfileId] =  currentProfileId;
-    const [navigationMap, setNavigationMap] = currentNavigationMap
-
-    const session= props.session
-
     return (
         <View style={styles.headerContainer}>
             <View style={styles.logoContainer}>
-                <Image 
-                        source={require("../assets/images/icon.png")}
-                        style={styles.logo}
-                        resizeMode='contain'
-                />
-                <Text style={styles.stateText}>{appState}</Text>
-            </View>
-            <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     onPress={() => {
-                        updateAppState("settings", appState, setAppState, navigationMap, setNavigationMap)
-                    }}
-                >
-                    <FontAwesome 
-                        name="cog" 
-                        style={styles.settingsIcon}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => {
-                        setProfileId(session?.user.id);
-                        props.setScreen("profile");
-                        // updateAppState("profile", appState, setAppState, navigationMap, setNavigationMap)
+                        props.setScreen("home");
                     }}
                 >
                     <Image 
-                        source={{ uri: props.profileImage }}
-                        style={styles.userImage}
+                        source={require("../assets/images/icon.png")}
+                        style={styles.logo}
                         resizeMode='contain'
                     />
                 </TouchableOpacity>
 
+                <Text style={styles.stateText}>{props.appState}</Text>
+            </View>
+            <View style={styles.buttonContainer}>
+                {/* Pressing on the users image will send you to thier profile */}
+                <TouchableOpacity
+                    onPress={() => {
+                        props.setScreen("profile");
+                    }}
+                >
+                    <AvatarImage
+                        full_name={props.user.full_name}
+                        signedUrl={props.user.avatar_signedUrl}
+                        size={80}
+                    />
+                </TouchableOpacity>
             </View>
         </View>
     )

@@ -121,6 +121,16 @@ const checkLocationData = async() => {
     }
 }
 
+// stores the location value in AsyncStorage
+export const storeLocation = async (value) => {
+    try {
+        const jsonValue = JSON.stringify(value);
+        await AsyncStorage.setItem('setLocation', jsonValue);
+    } catch (e) {
+        Alert.alert("Error saving location")
+    }
+};
+
 export const checkTimeFormat = async() => {
     const timeFormat = await AsyncStorage.getItem('timeFormat');
     if(timeFormat == null){
@@ -193,4 +203,20 @@ export const storeAttractionsData = async (data) => {
 export const deleteAttractionsData = async() => {
     await AsyncStorage.removeItem('attractionData')
     return;
+}
+
+
+export function updateAttractions(attractions, updatedAttractionId, bool){
+    const updatedAttractions = attractions.map((attraction, i) => {
+        if(attraction.id == updatedAttractionId){
+            return {
+                ...attraction,
+                ticked: bool
+            }
+        } else {
+            return attraction
+        }
+    })
+    storeAttractionsData(updatedAttractions)
+    return updatedAttractions;
 }

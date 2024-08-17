@@ -1,32 +1,28 @@
-import { StyleSheet, View, Alert, Image, Text, Pressable, Animated, LayoutAnimation, Modal, Dimensions } from 'react-native'
+import { StyleSheet, View, Image, Text, Pressable, Animated, LayoutAnimation, Modal } from 'react-native'
 import React, { useState, useRef, useContext } from 'react'
-import { supabase } from '../lib/supabase'
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { UserContext } from '../context/Context';
 import { ConfirmTickBox } from './ConfirmTickBox';
 import { CancelTickBox } from './CancelTickBox';
-import { removeImage, saveImageToSupabase } from '../helperFunctions/supabaseFunctions';
-import { storeAttractionsData } from '../helperFunctions/generalFunctions';
+import { removeTick, insertTick } from '../helperFunctions/supabaseFunctions';
+import { updateAttractions } from '../helperFunctions/generalFunctions';
 
+// Uses Image Modal library - https://www.npmjs.com/package/react-native-image-modal
 import ImageModal from 'react-native-image-modal'
 
-export const TickBoxContainer = (props) => {
-    
-    const { currentAttractions } = useContext(UserContext);
+// This component displays 
+export const TickBoxContainer = ({ attraction, imageWidth }) => {    
+    const { currentAttractions, session } = useContext(UserContext);
     const [ attractions, setAttractions ] = currentAttractions;
 
     const [showDescription, setShowDescription] = useState(false);
-    const [isChecked, setChecked] = useState(props.attraction.ticked);
+    const [isChecked, setChecked] = useState(attraction.ticked);
     const [tickBoxDisabled, setTickBoxDisabled] = useState(false);
 
     const [showConfirmModel, setShowConfirmModel] = useState(false);
     const [showCancelModel, setShowCancelModel] = useState(false);
-
-    const [imageResizeMode, setImageResizeMode] = useState("hidden");
-
-    const windowWidth = Dimensions.get('window').width;
 
     const splashOpacity = useRef(new Animated.Value(0)).current;
     const animateSplash = () => {
@@ -54,57 +50,8 @@ export const TickBoxContainer = (props) => {
         });
     }
 
-    async function insertTick(imageUrl, comment){        
-        const imagePath = await saveImageToSupabase(imageUrl, 'tickImages')
-        const { data, error } = await supabase
-            .from('ticks')
-            .insert({ attraction_id: props.attraction.id, comment: comment, image_url: imagePath ? imagePath : null })
-            .select()
-        if(data){
-            console.log("tick inserted")
-        }
-        if(error){
-            console.log(error)
-        }
-        setAttractions(updateAttractions(true));
-    }
-
-    async function removeTick(){
-        const { data, error } = await supabase
-            .from('ticks')
-            .delete()
-            .eq("user_id", props.session.user.id)
-            .eq("attraction_id", props.attraction.id)
-            .select()        
-        if (data){
-            if(data[0].image_url){
-                removeImage(data[0].image_url, "tickImages");    
-            }                    
-        }
-        if (error){
-            console.log(error);
-        }
-        setAttractions(updateAttractions(false));
-    }
-
-    function updateAttractions(bool){
-        const updatedAttractions = attractions.map((attraction, i) => {
-            if(attraction.id == props.attraction.id){
-                return {
-                    ...attraction,
-                    ticked: bool
-                }
-            } else {
-                return attraction
-            }
-        })
-        storeAttractionsData(updatedAttractions)
-        return updatedAttractions;
-    }
-
     return (
         <View
-            {...props}
             style={styles.tickBoxContainer}
         >   
             <View style={styles.tickBoxTextContainer}>
@@ -121,23 +68,23 @@ export const TickBoxContainer = (props) => {
                             setShowDescription(!showDescription);
                         }}
                     />
-                    <Text style={styles.tickBoxMainText}>{props.attraction.name}</Text>
+                    <Text style={styles.tickBoxMainText}>{attraction.name}</Text>
                 </View>
                 <View style={styles.tickBoxDistanceContainer}>
-                    <Text>{props.attraction.currentDistance}</Text>
+                    <Text>{attraction.currentDistance}</Text>
                 </View>                
             </View>
             {showDescription && (
                 <View style={[styles.descriptionContainer]} >
-                    <Text>{props.attraction.description}</Text>    
+                    <Text>{attraction.description}</Text>    
                 </View>
             )}
 
             <View style={styles.tickBoxElementContainer}>
                 <View style={styles.imageContainer}>
                     <ImageModal
-                        source={{ uri: props.attraction.url }}
-                        style={[styles.attractionImage, {width: props.imageWidth}]}
+                        source={{ uri: attraction.url }}
+                        style={[styles.attractionImage, {width: imageWidth}]}
                         resizeMode={"hidden"}
                         modalImageResizeMode={"contain"}
                     />
@@ -169,13 +116,10 @@ export const TickBoxContainer = (props) => {
                 animationType="slide"
                 transparent={true}
                 visible={showConfirmModel}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setShowConfirmModel(false)                    
-                }}>
+            >
                 <View style={styles.modelContainer}>
                     <ConfirmTickBox 
-                        attraction={props.attraction}
+                        attractionName={attraction.name}
                         add={isChecked}
                         hide={() => {
                             setShowConfirmModel(false)
@@ -183,11 +127,11 @@ export const TickBoxContainer = (props) => {
                         removeTick={() => {
                             setChecked(false)
                         }}
-                        insertTick={(imageUrl, comment) => {
-                            insertTick(imageUrl, comment);
-                        }}
-                        deleteTick={() => {
-                            removeTick();
+                        insertTick={async (imageUrl, comment) => {
+                            const success = await insertTick(attraction.id, imageUrl, comment);
+                            if (success){
+                                setAttractions(updateAttractions(attractions, attraction.id, true));
+                            }
                         }}
                     />
                 </View>               
@@ -199,14 +143,18 @@ export const TickBoxContainer = (props) => {
             >
                 <View style={styles.modelContainer}>
                     <CancelTickBox 
-                        attraction={props.attraction}
+                        attractionName={attraction.name}
                         add={isChecked}
                         hide={() => {
                             setShowCancelModel(false)
                         }}
-                        removeTick={() => {
-                            removeTick()
+                        removeTick={async () => {
                             setChecked(false)
+                            const success = await removeTick(session.user.id, attraction.id)
+                            if (success){
+                                setAttractions(updateAttractions(attractions, attraction.id, false));
+                                
+                            }                            
                         }}
                     />
                 </View>
@@ -218,9 +166,6 @@ export const TickBoxContainer = (props) => {
 const styles = StyleSheet.create({
     container: {
       paddingHorizontal: 12,
-    },
-    attractionsContainer: {
-        // paddingVertical: 20
     },
     tickBoxTextContainer: {
         flexDirection: "row",

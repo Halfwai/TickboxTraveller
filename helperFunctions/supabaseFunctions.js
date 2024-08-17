@@ -312,3 +312,36 @@ export const updateProfile = async (full_name, email, user, image ) => {
     } 
 }
 
+export async function insertTick(id, imageUrl, comment){        
+    const imagePath = await saveImageToSupabase(imageUrl, 'tickImages')
+    const { data, error } = await supabase
+        .from('ticks')
+        .insert({ attraction_id: id, comment: comment, image_url: imagePath ? imagePath : null })
+        .select()
+    if(data){
+        return true;
+    }
+    if(error){
+        Alert.alert("Tick not inserted into Database")
+        return false;
+    }
+}
+
+export async function removeTick(id, attraction_id){
+    const { data, error } = await supabase
+        .from('ticks')
+        .delete()
+        .eq("user_id", id)
+        .eq("attraction_id", attraction_id)
+        .select()        
+    if (data){
+        if(data[0].image_url){
+            removeImage(data[0].image_url, "tickImages");    
+        }
+        return true;                  
+    }
+    if (error){
+        Alert.alert("Tick not removed from database", "Please reset attractions in settings and try again");
+    }
+}
+

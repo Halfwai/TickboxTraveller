@@ -1,13 +1,12 @@
 import { StyleSheet, View, ScrollView, FlatList, Dimensions } from 'react-native'
 import React, { useContext } from 'react'
 
-import { UserContext } from '../context/Context';
+import { UserContext } from '../../context/Context';
 
-import { TickBoxContainer } from './TickBoxContainer'
+import { TickBoxContainer } from '../../components/TickBoxContainer'
 
 export function LogScreen(props) {
     const windowWidth = Dimensions.get('window').width;
-    const session = props.session;
     const attractions = props.attractions;
     return (
         <View style={styles.container}>
@@ -18,7 +17,6 @@ export function LogScreen(props) {
                     renderItem={attraction => (
                         <TickBoxContainer 
                             attraction={attraction.item}
-                            session={session}
                             key={attraction.item.id}
                             imageWidth={windowWidth - 20}
                         /> 

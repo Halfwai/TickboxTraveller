@@ -21,8 +21,10 @@ export const UserView = (props) => {
                     props.action();
                 }}
             >
-                <AvatarImage 
-                    data={user}
+                <AvatarImage
+                    full_name={user.full_name}
+                    signedUrl={user.avatar_signedUrl}
+                    size={55}
                 />
                 <Text style={styles.nameText}>{user.full_name}</Text>
             </TouchableOpacity>
