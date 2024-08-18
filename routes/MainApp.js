@@ -61,7 +61,7 @@ export default function MainApp({ session }) {
     const getAsyncData = async () => {
         setTimeFormat(await checkTimeFormat())
         setDistanceFormat(await checkDistanceFormat())
-        getProfile(setUserData, session?.user.id);
+        setUserData(await getProfile(session?.user.id));
         getFollowedUserTicks(session?.user.id, setTicksViewData);
         getLocationData(setLocation, setAskForLocation, setGpsPermissionGranted);
         setAttractions(await getAttractionData())

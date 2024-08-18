@@ -7,8 +7,8 @@ import { AvatarImage } from "./AvatarImage";
 
 // This component displays data on a user on the search screen. Takes three props, the user object, the id of the current user
 // and the action function which sets the ID for the proile to be displayed and shows the profile page.
-export const UserView = ({user, sessionId, action}) => {
-    const user = user.item;
+export const UserView = ({userData, sessionId, action}) => {
+    const user = userData.item;
 
     // if the user found in search is the current user, then no UserView is shown for themself.
     if (sessionId == user.id){

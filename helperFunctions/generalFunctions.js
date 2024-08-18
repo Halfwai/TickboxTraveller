@@ -41,7 +41,8 @@ export async function uploadImage() {
 }
 
 
-// Sorts the attractions by distance from the users location. Uses the geolib library
+// Sorts the attractions by distance from the users location. Uses the geolib library to do distance calculations using
+// latitude and longitude. Also formats the distance into km or miles based on user settings.
 export const sortAttractions = (attractionsList, location, distanceFormat) => {
     let sortedAttractionsList = [...attractionsList];
     sortedAttractionsList = orderByDistance(location, sortedAttractionsList);
@@ -63,6 +64,8 @@ export const sortAttractions = (attractionsList, location, distanceFormat) => {
     return sortedAttractionsList
 }
 
+// Handles what happns when the user presses the back button. Takes an array of pervious screens that the user
+// has been to, and cycles back through them. If this array is empty prompts the user on closing the app
 export const handleBackAction = (navigationMap, setAppState, setNavigationMap) => {
     if(navigationMap.length <= 0){
         Alert.alert('Would you like to exit Tickbox Traveller?', null, [
@@ -81,6 +84,8 @@ export const handleBackAction = (navigationMap, setAppState, setNavigationMap) =
     return true;
 };
 
+// Changes the appState - the screen that the app is showing and adds the previous screen to the navigation map for
+// back button functionality
 export const updateAppState = (newAppState, appState, setAppState, navigationMap, setNavigationMap) => {
     const upDatedNavigationMap = [...navigationMap]
     upDatedNavigationMap.push(appState);
@@ -88,6 +93,8 @@ export const updateAppState = (newAppState, appState, setAppState, navigationMap
     setNavigationMap(upDatedNavigationMap);
 }
 
+// Gets the location data from the user using gps. If the user has denied location permissions, on the first attempt will
+// display a screen to allow the user to set their location. 
 export const getLocationData = async (setLocation, setAskForLocation, setGpsPermissionGranted) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
@@ -113,6 +120,8 @@ export const getLocationData = async (setLocation, setAskForLocation, setGpsPerm
     })
 }
 
+
+// Checks async storage for location data.
 const checkLocationData = async() => {
     try {
         const value = await AsyncStorage.getItem('setLocation');
@@ -122,7 +131,7 @@ const checkLocationData = async() => {
     }
 }
 
-// stores the location value in AsyncStorage
+// stores the users set location value in AsyncStorage if they have manually set their location
 export const storeLocation = async (value) => {
     try {
         const jsonValue = JSON.stringify(value);
@@ -132,6 +141,8 @@ export const storeLocation = async (value) => {
     }
 };
 
+// Checks the time format that the user can set in settings. On first loading the app the default 
+// is using 12h time format, this is stored in AsyncStorage
 export const checkTimeFormat = async() => {
     const timeFormat = await AsyncStorage.getItem('timeFormat');
     if(timeFormat == null){
@@ -144,6 +155,7 @@ export const checkTimeFormat = async() => {
     return timeFormat;
 }
 
+// Sets the stored time format in AsyncStorage, argumant should be a string, either '12h' or '24h'
 export const saveTimeFormat = async(newFormat) => {
     try {
         await AsyncStorage.setItem(
@@ -156,6 +168,7 @@ export const saveTimeFormat = async(newFormat) => {
     }
 }
 
+// Checks the distance format that the user can set in Settings. Default value is km, and this is tored in AsyncStorage
 export const checkDistanceFormat = async() => {
     const distanceFormat = await AsyncStorage.getItem('distanceFormat');
     if(distanceFormat == null){
@@ -168,6 +181,7 @@ export const checkDistanceFormat = async() => {
     return distanceFormat;
 }
 
+// Sets the distance format in AsyncStorage. Argument is a string value, either 'km' or 'miles'
 export const saveDistanceFormat = async(newFormat) => {
     try {
         await AsyncStorage.setItem(
@@ -180,6 +194,8 @@ export const saveDistanceFormat = async(newFormat) => {
     }
 }
 
+// App will store Attraction data in AsyncStorage to prevent unnecessary calls to the database API. This function will check
+// if the user has done this yet and return the data if so.
 export const checkStorageAttractionData = async () => {
     try {
         const value = await AsyncStorage.getItem('attractionData');
@@ -192,6 +208,7 @@ export const checkStorageAttractionData = async () => {
     }
 }
 
+// Stores the attraction data in AsyncStorage
 export const storeAttractionsData = async (data) => {
     try {
         const jsonValue = JSON.stringify(data);
@@ -201,12 +218,14 @@ export const storeAttractionsData = async (data) => {
     }
 }
 
+// Deletes the attraction Data from AsyncStorage. 
 export const deleteAttractionsData = async() => {
     await AsyncStorage.removeItem('attractionData')
     return;
 }
 
-
+// Updated attractions when a tick is inserted or removed. bool argument set to true if box is being ticked, and false if the tick
+// is being removed
 export function updateAttractions(attractions, updatedAttractionId, bool){
     const updatedAttractions = attractions.map((attraction, i) => {
         if(attraction.id == updatedAttractionId){
@@ -222,6 +241,7 @@ export function updateAttractions(attractions, updatedAttractionId, bool){
     return updatedAttractions;
 }
 
+// Formats a time stamp based on the user setting, either 12h or 24h
 export const formatTime = (timeStamp, timeFormat) => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const date = new Date(timeStamp)

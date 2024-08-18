@@ -69,7 +69,7 @@ export const Search = (props) => {
                         data={userData}
                         renderItem={user => 
                             <UserView
-                                user={user}
+                                userData={user}
                                 action={() => {
                                     setProfileId(user.item.id);
                                     updateAppState("profile", appState, setAppState, navigationMap, setNavigationMap)

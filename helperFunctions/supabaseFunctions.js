@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
-import { sortAttractions } from './generalFunctions';
 import { Alert } from "react-native";
 
+// Gets a Signed URL from supabase for the requested image, takes the image path, and the bucket that it is stored in
 export async function getImageUrl(path, bucket) {
     if(!path){
         return;
@@ -14,7 +14,6 @@ export async function getImageUrl(path, bucket) {
                 height: 10,
             },
         })
-
         if (error) {
             throw error
         }
@@ -22,11 +21,12 @@ export async function getImageUrl(path, bucket) {
             return data.signedUrl;
         }
     } catch (error) {
-        console.log('Error getting URL: ', error.message)
+        Alert.alert("Error", "Unable to find image")
     }
 }
 
-export async function getProfile(setUserData, id) {
+// Returns profile data on a single user for the profile page
+export async function getProfile(id) {
     try {
         const { data, error, status } = await supabase
             .from('profiles')
@@ -38,21 +38,22 @@ export async function getProfile(setUserData, id) {
         }
         if (data) {
             if(data.avatar_url){
+                // If the user has an avatar_url gets a signed url for that image and attaches it to the returned data
                 const imageUrl = await getImageUrl(data.avatar_url, "avatars")
-                setUserData({
+                return {
                     ...data,
                     avatar_signedUrl: imageUrl
-                })
-                return;
+                };
             }
-            setUserData(data)
+            return data;
         }
     } catch (error) {
-        console.log(error)
+        Alert.alert("Error", "Unable to recover user data")
     }
 }
 
-export const getTicksData = async (setTicks, id) => {
+// Returns the data on a single users Ticsk for the profile page 
+export const getTicksData = async (id) => {
     let { data, error } = await supabase
         .rpc('get_single_user_ticks', {
             input_id: id
@@ -60,15 +61,12 @@ export const getTicksData = async (setTicks, id) => {
     if(data){
         if(data.length > 0){
             const dataWithUrls = await handleImageUrls(data)
-            setTicks(dataWithUrls)
-            return
+            return dataWithUrls;
         }
-        setTicks(data);
-        
-        
+        return data;          
     }
     if (error){
-        console.log(error);
+        Alert.alert("Error", "Unable to recover ticks data")
     }
 }
 

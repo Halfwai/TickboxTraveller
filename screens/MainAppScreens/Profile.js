@@ -15,10 +15,13 @@ export const Profile = () => {
 
     useEffect(() => {
         if(profileData == null){
-            getProfile(setProfileData, profileId )
-            getTicksData(setTicksData, profileId );
+            (async () => {
+                setProfileData(await getProfile(profileId))
+                setTicksData(await getTicksData(profileId))
+            })()
         }           
     }, [profileData])
+
 
     return(
         <View style={styles.container}>
