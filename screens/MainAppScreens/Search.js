@@ -11,7 +11,7 @@ import { UserView } from '../../components/UserView';
 
 import { UserContext } from '../../context/Context'
 
-export const Search = (props) => {
+export const Search = ({session, setProfile}) => {
     const radioButtons = useMemo(() => ([
         {
             id: 'full_name', // acts as primary key, should be unique and non-empty string
@@ -23,10 +23,7 @@ export const Search = (props) => {
         }
     ]), []);
 
-    const session = props.session
-
-    const { currentProfileId, currentAppState, currentNavigationMap } = useContext(UserContext)
-    const [ profileId, setProfileId ] = currentProfileId;
+    const { currentAppState, currentNavigationMap } = useContext(UserContext)
     const [ appState, setAppState ] = currentAppState;
     const [ navigationMap, setNavigationMap ] = currentNavigationMap; 
 
@@ -34,8 +31,10 @@ export const Search = (props) => {
     const [searchText, setSearchText] = useState("")
     const [userData, setUserData] = useState(null);
 
-    useEffect(() => {
-        getUserData(setUserData, selectedId, searchText, session.user.id);
+    useEffect(() => {        
+        (async () => {
+            setUserData(await getUserData(selectedId, searchText, session.user.id))
+        })();
     }, [searchText])
 
     return (
@@ -71,7 +70,7 @@ export const Search = (props) => {
                             <UserView
                                 userData={user}
                                 action={() => {
-                                    setProfileId(user.item.id);
+                                    setProfile(user.item.id);
                                     updateAppState("profile", appState, setAppState, navigationMap, setNavigationMap)
                                 }}
                                 key={user.id}

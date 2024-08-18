@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { getDistance, orderByDistance } from 'geolib';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { downloadAttractionsData } from './supabaseFunctions';
 
 import { manipulateAsync,  SaveFormat } from 'expo-image-manipulator';
 
@@ -23,6 +24,8 @@ export async function uploadImage() {
             return
         }
 
+        // This code reduces the size of the image, compresses it and returns it as a webp. I am using Supabase as the backend,
+        // and downloads are very limited so by compressing the image this severly I am saving data charges.
         const compressedImage = await manipulateAsync(
             result.assets[0].uri,
             [{ resize: { height: 200} }],
@@ -95,29 +98,28 @@ export const updateAppState = (newAppState, appState, setAppState, navigationMap
 
 // Gets the location data from the user using gps. If the user has denied location permissions, on the first attempt will
 // display a screen to allow the user to set their location. 
-export const getLocationData = async (setLocation, setAskForLocation, setGpsPermissionGranted) => {
+export const getLocationData = async (setAskForLocation, setGpsPermissionGranted) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
         const storedLocationData = await checkLocationData()
         if(storedLocationData == null){
             setAskForLocation(true);
-            return
+            return false;
         }
         else {
             const locationData = JSON.parse(storedLocationData)
-            setLocation({
+            return {
                 latitude: locationData.latitude, 
                 longitude: locationData.longitude
-            })
-            return;
+            };
         }            
     }
     setGpsPermissionGranted(true);
     let currentLocation = await Location.getCurrentPositionAsync({});
-    setLocation({
+    return {
         latitude: currentLocation.coords.latitude, 
         longitude: currentLocation.coords.longitude
-    })
+    }
 }
 
 
@@ -224,6 +226,16 @@ export const deleteAttractionsData = async() => {
     return;
 }
 
+// gets and returns the attractions data, either from AsyncStorage, or from the database
+export const getAttractionData = async (id) => {
+    let data = await checkStorageAttractionData()
+    if(!data){
+        data = await downloadAttractionsData(id)
+    }
+    return data;
+}
+
+
 // Updated attractions when a tick is inserted or removed. bool argument set to true if box is being ticked, and false if the tick
 // is being removed
 export function updateAttractions(attractions, updatedAttractionId, bool){
@@ -253,3 +265,4 @@ export const formatTime = (timeStamp, timeFormat) => {
     }).format(date)
     return currentDate
 }
+

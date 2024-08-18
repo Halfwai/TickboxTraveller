@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo } from 'react'
-import { StyleSheet, View, BackHandler, Button } from 'react-native'
+import { useState, useEffect } from 'react'
+import { StyleSheet, View, BackHandler, Alert } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 
 import { UserContext } from '../context/Context'
 
-import * as React from 'react';
 import { LogScreen } from '../screens/MainAppScreens/LogScreen';
 import { BottomMenu } from '../components/BottomMenu';
 import { Map } from '../screens/MainAppScreens/Map';
@@ -15,8 +14,8 @@ import { Profile } from '../screens/MainAppScreens/Profile';
 import { Search } from '../screens/MainAppScreens/Search';
 import { Settings } from '../screens/MainAppScreens/Settings';
 
-import { getProfile, downloadAttractionsData, getFollowedUserTicks } from '../helperFunctions/supabaseFunctions';
-import { sortAttractions, handleBackAction, getLocationData, checkTimeFormat, checkDistanceFormat, checkStorageAttractionData, storeAttractionsData, deleteAttractionsData, updateAppState  } from '../helperFunctions/generalFunctions';
+import { getProfile, getFollowedUserTicks } from '../helperFunctions/supabaseFunctions';
+import { sortAttractions, handleBackAction, getLocationData, checkTimeFormat, checkDistanceFormat, deleteAttractionsData, getAttractionData, updateAppState, storeLocation  } from '../helperFunctions/generalFunctions';
 
 export default function MainApp({ session }) {
     const [userData, setUserData] = useState(null);
@@ -26,7 +25,6 @@ export default function MainApp({ session }) {
     const [ location, setLocation ] = useState(null);
     const [ askForLocation, setAskForLocation ] = useState(false);
     const [ ticks, setTicks] = useState(null);
-    const [ attractionsSorted, setAttractionsSorted ] = useState(false);
     const [ navigationMap, setNavigationMap ] = useState([])
     const [ profileId, setProfileId] = useState(null);
     const [ ticksViewData, setTicksViewData ] = useState(null)
@@ -39,9 +37,21 @@ export default function MainApp({ session }) {
     useEffect(() => {
         if (session) {
             try {
-                getAsyncData();
-            } catch(e){
-                console.log(e);
+                (async () => {
+                    setTimeFormat(await checkTimeFormat())
+                    setDistanceFormat(await checkDistanceFormat())
+                    setUserData(await getProfile(session?.user.id));
+                    setTicksViewData(await getFollowedUserTicks(session?.user.id));
+                    const attractionsData = await getAttractionData(session?.user.id)
+                    setAttractions(attractionsData);
+                    const locationData = await getLocationData(setAskForLocation, setGpsPermissionGranted)
+                    if (locationData){
+                        setLocation(locationData)
+                        setAttractions(sortAttractions(attractionsData, locationData, distanceFormat))
+                    }                    
+                })()
+            } catch(error){
+                Alert.alert("Error Fetching App Data", error.message)
             }            
         }
     }, [session])
@@ -51,36 +61,11 @@ export default function MainApp({ session }) {
             const newSortedAttractionsList = sortAttractions(attractions, location, distanceFormat)
             setAttractions(newSortedAttractionsList);
         }
-    }, [distanceFormat])
+    }, [distanceFormat, location])
 
     useEffect(() => {
         getFollowedUserTicks(session?.user.id, setTicksViewData);
     }, [attractions])
-
-
-    const getAsyncData = async () => {
-        setTimeFormat(await checkTimeFormat())
-        setDistanceFormat(await checkDistanceFormat())
-        setUserData(await getProfile(session?.user.id));
-        getFollowedUserTicks(session?.user.id, setTicksViewData);
-        getLocationData(setLocation, setAskForLocation, setGpsPermissionGranted);
-        setAttractions(await getAttractionData())
-    }
-
-    const resetAttractions = async () => {
-        await deleteAttractionsData()
-        const newAttractions = await getAttractionData()
-        setAttractions(sortAttractions(newAttractions, location, distanceFormat))
-    }
-
-    const getAttractionData = async () => {
-        let data = await checkStorageAttractionData()
-        if(!data){
-            data = await downloadAttractionsData(session.user.id)
-            storeAttractionsData(data)
-        }
-        return data;
-    }
 
     useEffect(() => {
         const backHandler = BackHandler.addEventListener(
@@ -94,26 +79,15 @@ export default function MainApp({ session }) {
 
     if(askForLocation){
         return (
-
             <GetLocationScreen 
-                setLocation={(location) => {
-                    setLocation(location)
-                }}
-                setAskForLocation={(bool) => {
-                    setAskForLocation(bool)
+                setLocation = {async (pickedLocation) => {
+                    setLocation(pickedLocation);
+                    setAskForLocation(false);
+                    storeLocation(pickedLocation);
+                    Alert.alert("Location set", "If you wish to change this, you can do so in settings. Better yet, enable location permissions.")
                 }}
             />
-
         )
-    }
-            
-    if (!userData || !attractions || !location){
-        return;
-    }
-
-    if(!attractionsSorted){
-        setAttractions(sortAttractions(attractions, location, distanceFormat))
-        setAttractionsSorted(true);
     }
 
     return (
@@ -132,69 +106,83 @@ export default function MainApp({ session }) {
                 currentDistanceFormat: [distanceFormat, setDistanceFormat]
             }        
         }>
-            <View style={styles.container}>
-                <View style={styles.headerContainer}>
-                    <Header
-                        user={userData} 
-                        setScreen={async (newScreen) => {
-                            await setProfileId(session.user.id);
-                            updateAppState(newScreen, appState, setAppState, navigationMap, setNavigationMap)
-                        }}
-                        appState={appState}
-                    />
-                </View>
-                <View style={styles.contentContainer}>
-                     {appState == "log ticks" && 
-                        <LogScreen 
-                            session={session}
-                            attractions={attractions}
-                        />
-                    }
-                    {appState == "map" && 
-                        <Map 
-                            attractions={attractions}
-                            location={location}
-                            session={session}
-                        />
-                    }
-                    {appState == "home" && 
-                        <Home 
-                            ticksData={ticksViewData}
-                        />
-                    }
-                    {appState == "profile" &&
-                        <Profile 
-                            id={profileId}
-                        />
-                    }
-                    {appState == "search" &&
-                        <Search 
-                            session={session}
-                        />
-                    } 
-                    {appState == "settings" &&
-                        <Settings 
-                            resetAttractionsData = {() => {
-                                resetAttractions()
+            { userData && attractions && location &&
+                <View style={styles.container}>
+                    <View style={styles.headerContainer}>
+                        <Header
+                            user={userData} 
+                            setScreen={async (newScreen) => {
+                                await setProfileId(session.user.id);
+                                updateAppState(newScreen, appState, setAppState, navigationMap, setNavigationMap)
                             }}
-                            gpsPermissionGranted={gpsPermissionGranted}
-                            showLocationScreen={() => {
-                                setAskForLocation(true);
-                                setAttractionsSorted(false);
+                            appState={appState}
+                        />
+                    </View>
+                    <View style={styles.contentContainer}>
+                        {appState == "log ticks" && 
+                            <LogScreen 
+                                session={session}
+                                attractions={attractions}
+                            />
+                        }
+                        {appState == "map" && 
+                            <Map 
+                                attractions={attractions}
+                                location={location}
+                                session={session}
+                            />
+                        }
+                        {appState == "home" && 
+                            <Home 
+                                ticksData={ticksViewData}
+                            />
+                        }
+                        {appState == "profile" &&
+                            <Profile 
+                                id={profileId}
+                            />
+                        }
+                        {appState == "search" &&
+                            <Search 
+                                session={session}
+                                setProfile={(id) => {
+                                    setProfileId(id);
+                                }}
+                                setScreen={async (newScreen) => {
+                                    await setProfileId(session.user.id);
+                                    updateAppState(newScreen, appState, setAppState, navigationMap, setNavigationMap)
+                                }}
+                            />
+                        } 
+                        {appState == "settings" &&
+                            <Settings 
+                                resetAttractionsData = {async () => {
+                                    await deleteAttractionsData()
+                                    const newAttractions = await getAttractionData(session.user.id);
+                                    setAttractions(sortAttractions(newAttractions, location, distanceFormat))    
+                                }}
+                                gpsPermissionGranted={gpsPermissionGranted}
+                                showLocationScreen={() => {
+                                    setAskForLocation(true);
+                                }}
+                                session={session}
+                            />                        
+                        }
+                    </View>
+                    <View style={styles.footerContainer}>
+                        <BottomMenu 
+                            setScreen={(newScreen) => {
+                                updateAppState(newScreen, appState, setAppState, navigationMap, setNavigationMap)
                             }}
-                        />                        
-                    }
+                            appState={appState}
+                        />
+                    </View>
+                    <StatusBar style="auto" />
                 </View>
-                <View style={styles.footerContainer}>
-                    <BottomMenu 
-                        setScreen={(newScreen) => {
-                            updateAppState(newScreen, appState, setAppState, navigationMap, setNavigationMap)
-                        }}
-                        appState={appState}
-                    />
-                </View>
-                <StatusBar style="auto" />
-            </View>
+                    
+
+            }
+
         </UserContext.Provider>
     )
 }

@@ -2,7 +2,6 @@ import { StyleSheet, View, Alert, Text } from 'react-native'
 import { useState } from 'react'
 
 import { CustomButton } from './GenericComponents'
-import { storeLocation } from '../helperFunctions/generalFunctions';
 
 // uses the country-city-location library to get a list of countries and cities https://www.jsdelivr.com/package/npm/country-city-location
 import {
@@ -24,19 +23,10 @@ const updatedCountries = countries.map((country) => {
 })
 
 // This component displays a screen to get the location of the user if they deny location permissions. Takes two props, one that sets the location of the user, and one that controls the display of this screen
-export const GetLocationScreen = ({setLocation, setAskForLocation}) => {
+export const GetLocationScreen = ({setLocation}) => {
     const [ pickedLocation, setPickedLocation ] = useState(null);
 
     const [cityList, setCityList] = useState([]);
-
-    // async function that sets the location to the one picked by the user and returns the user to the main app
-    const setValues = async () => {
-        await setLocation(pickedLocation);
-        await setAskForLocation(false);
-        storeLocation(pickedLocation);
-        Alert.alert("Location set", "If you wish to change this, you can do so in settings. Better yet, enable location permissions.")
-        return
-    }
 
     return (
         <View style={styles.container}>
@@ -74,7 +64,7 @@ export const GetLocationScreen = ({setLocation, setAskForLocation}) => {
                 />
                 <CustomButton 
                     action={() => {
-                        setValues();
+                        setLocation(pickedLocation)
                     }}
                     text={"Set Location"}
                     disabled={pickedLocation == null}

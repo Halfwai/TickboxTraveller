@@ -1,11 +1,5 @@
-import { StyleSheet, View, Text, TouchableOpacity, Button, FlatList } from "react-native";
-import { useState, useEffect, useMemo, useContext } from 'react'
-import { supabase } from '../../lib/supabase'
-import { UserContext } from "../../context/Context";
+import { StyleSheet, View, Text, FlatList } from "react-native";
 import { TickView } from "../../components/TickView";
-
-import { checkStorageAttractionData } from "../../helperFunctions/generalFunctions";
-import { getAttractionsData } from "../../helperFunctions/supabaseFunctions";
 
 
 
@@ -14,9 +8,6 @@ export const Home = (props) => {
     if(!ticksData){
         return;
     }
-
-
-
     return(
         <View>
             { ticksData?.length > 0 ?

@@ -7,10 +7,7 @@ import { SignUp } from '../screens/AuthScreens/SignUp'
 
 import { AuthContext } from '../context/Context'
 
-// Tells Supabase Auth to continuously refresh the session automatically if
-// the app is in the foreground. When this is added, you will continue to receive
-// `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
-// if the user's session is terminated. This should only be registered once.
+// Continusly refreshed SupabaseAuth. This code is taken from - https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native
 AppState.addEventListener('change', (state) => {
     if (state === 'active') {
         supabase.auth.startAutoRefresh()
@@ -19,12 +16,14 @@ AppState.addEventListener('change', (state) => {
     }
 })
 
+// The Auth route runs if the user has not signed in and no token is present
 export default function Auth() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     
     const [signingUp, setSigningUp] = useState(false);
     return (
+        // Context used as both auth pages need access to the same state data
         <AuthContext.Provider value={
             { 
                 emailState: [email, setEmail],

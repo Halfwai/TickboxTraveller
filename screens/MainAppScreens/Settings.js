@@ -3,11 +3,11 @@ import { UserContext } from '../../context/Context'
 import { useContext, useState, useEffect, useRef } from 'react'
 import { CustomButton, Input } from "../../components/GenericComponents";
 import { ToggleButton } from "../../components/ToggleButton";
-import { saveTimeFormat, saveDistanceFormat, uploadImage } from "../../helperFunctions/generalFunctions";
-import { updateProfile, getProfile } from "../../helperFunctions/supabaseFunctions"
+import { saveTimeFormat, saveDistanceFormat, uploadImage, deleteAttractionsData, getAttractionsData } from "../../helperFunctions/generalFunctions";
+import { updateProfile, getProfile, createUserUpdateObject } from "../../helperFunctions/supabaseFunctions"
 import { supabase } from '../../lib/supabase'
 
-export const Settings = ({resetAttractionsData, gpsPermissionGranted, showLocationScreen}) => {
+export const Settings = ({resetAttractionsData, gpsPermissionGranted, showLocationScreen, session}) => {
     const { currentUserData, currentTimeFormat, currentDistanceFormat, currentAttractions } = useContext(UserContext)
     const [ userData, setUserData ] = currentUserData;
     const [ timeFormat, setTimeFormat ] = currentTimeFormat;
@@ -30,12 +30,14 @@ export const Settings = ({resetAttractionsData, gpsPermissionGranted, showLocati
     }
 
     const handleUpdate = async() => {
-        setUpdating(true)
-        const profileUpdated = await updateProfile(fullName, email, userData, newImage);
+        const updatedUser = await createUserUpdateObject(fullName, email, userData, newImage);
+        if(!updatedUser){
+            return
+        }
+        const profileUpdated = await updateProfile(updatedUser);        
         if(profileUpdated){
-            await getProfile(setUserData, userData.id)
+            setUserData(await getProfile(userData.id));
         }        
-        setUpdating(false)
     }
 
     return (
@@ -80,8 +82,10 @@ export const Settings = ({resetAttractionsData, gpsPermissionGranted, showLocati
                 <CustomButton 
                     text={updating? "Saving Changes":"Save Changes"}
                     disabled={updating}
-                    action={() => {
-                        handleUpdate();
+                    action={async () => {
+                        setUpdating(true)
+                        await handleUpdate();
+                        setUpdating(false)
                     }}
                 />
                 <View style={styles.subheadingContainer}>
@@ -133,7 +137,7 @@ export const Settings = ({resetAttractionsData, gpsPermissionGranted, showLocati
                     />
                     <CustomButton 
                         text={"Reset Attractions Data"}
-                        action={() => {
+                        action={async () => {
                             resetAttractionsData();
                         }}
                         style={styles.bottomButton}

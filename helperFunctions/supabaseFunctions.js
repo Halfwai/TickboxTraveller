@@ -52,7 +52,7 @@ export async function getProfile(id) {
     }
 }
 
-// Returns the data on a single users Ticsk for the profile page 
+// Returns the data on a single users Ticks for the profile page 
 export const getTicksData = async (id) => {
     let { data, error } = await supabase
         .rpc('get_single_user_ticks', {
@@ -70,56 +70,60 @@ export const getTicksData = async (id) => {
     }
 }
 
-export const getUserData = async (setUserData, searchType, searchString, userId) => {
+// Searches and returns users based on a string. The searchType argument allows a search using full_name or email
+export const getUserData = async (searchType, searchString, userId) => {
+    // The .ilike property makes the search case insenstive
     const { data, error } = await supabase
         .rpc('get_user_data', { user_id: userId})
-        .like(searchType, `%${searchString}%`)
+        .ilike(searchType, `%${searchString}%`)
     if (data){
+        if(data.length == 0){
+            return data;
+        }
+        // maps the avatar_urls to an array so that the avatar images can be signed using one request
         const imageUrls = data.map((tick) => {
             return tick.avatar_url
         });
         const signedAvatarUrls = await getImageUrls(imageUrls, 'avatars')
+        // adds the signedUrls back to the data objects
         const dataWithImageUrls = data.map((profile, i) => {
             return {
                 ...profile,
                 avatar_signedUrl: signedAvatarUrls[i].signedUrl
             };
         })
-        setUserData(dataWithImageUrls)
+        return dataWithImageUrls;
     }
     if (error){
-        console.log(error)
+        Alert.alert("Search Error", error.message)
     }
 } 
 
+// Inserts a follow into the follows table to indicate that the user is following another
 export const insertFollow = async (followerId, followeeId) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from('follows')
         .insert({follower: followerId, followee: followeeId})
         .select()
     if(error){
-        console.log(error)
-    }
-    if (data){
-        console.log(data)
+        Alert.alert("Add Follow Error", error.message)
     }
 } 
 
+// Removes a follow in the follows table to indicate that the user has unfollowed someone
 export const removeFollow = async (followerId, followeeId) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from('follows')
         .delete()
         .eq("follower", followerId)
         .eq("followee", followeeId)
         .select()
     if(error){
-        console.log(error)
-    }
-    if (data){
-        console.log(data)
+        Alert.alert("Remove Follow Error", error.message)
     }
 } 
 
+// When a user updates their avater, or removes a tick, this function will delete the image from the supabase database.
 export const removeImage = async (image, bucket) => {
     if(!image){
         return null;
@@ -133,10 +137,11 @@ export const removeImage = async (image, bucket) => {
             throw error
         }
     } catch (error) {
-        console.log(error);
+        Alert.alert("Error Removing Image", error.message)
     }
 }
 
+// Saves an image to the supabase database and returns it's path
 export const saveImageToSupabase = async (image, bucket) => {
     if(!image){
         return null;
@@ -160,68 +165,64 @@ export const saveImageToSupabase = async (image, bucket) => {
             return imagePath
         }
     } catch (error) {
-        console.log(error);
+        Alert.alert("Error Saving Image to Database", error.message)
     }
 }
 
-export const getFollowedUserTicks = async (user_id, setData) => {
+// Returns the ticks from all the users that the main user is following
+export const getFollowedUserTicks = async (user_id) => {
     try {
-        let { data: tickData, error: tickError } = await supabase
+        let { data, error } = await supabase
             .rpc('get_followed_user_ticks', {
                 input_id: user_id
             })
-        if (tickError) {
-            throw(tickError)  
+        if (error) {
+            throw(error)  
         } else {
-            if (tickData.length == 0){
-                setData(tickData)
-                return;
+            if (data.length == 0){
+                return data;
             }
-            const dataWithUrls = await handleImageUrls(tickData);
-            setData(dataWithUrls);
+            const dataWithUrls = await handleImageUrls(data);
+            return dataWithUrls;
         }
     } catch (error) {
-        console.log(`Home screen Error: ${error.message}`);
+        Alert.alert("Error Getting Home Screen Data", error.message);
     }   
 }
 
+// Retrives signedUrls for the function getFollowedUserTicks
 const handleImageUrls = async (tickData) => {
+    // creats an array with all the image_urls
     const imageUrls = tickData.map((tick) => {
         return tick.image_url
     });
+    // retrices signed urls for these
     const signedTickUrls = await getImageUrls(imageUrls, 'tickImages')
+    // creates an array with all the avatarUrls
     const avatarUrls = tickData.map((tick) => {
         return tick.avatar_url
     });
+    // retrives signed urls for these
     const signedProfileUrls = await getImageUrls(avatarUrls, 'avatars')
+    // replaces each object in the array with a new version with the signed urls attached
     const dataWithImageUrls = tickData.map((tick, i) => {
         return {
-        ...tick,
-        image_signedUrl: signedTickUrls[i].signedUrl,
-        avatar_signedUrl: signedProfileUrls[i].signedUrl
+            ...tick,
+            image_signedUrl: signedTickUrls[i].signedUrl,
+            avatar_signedUrl: signedProfileUrls[i].signedUrl
         };
     })
     return dataWithImageUrls;
 }
 
-
-
-
-export const getImageUrls = async (path, bucket) => {
-    let imageSize = 10
-    if(bucket == "tickImages"){
-        imageSize = 200
-    }
-    if(!path){
+// Processes a request for signedUrls from supabase
+export const getImageUrls = async (array, bucket) => {
+    if(!array){
         return;
     }
     const { data, error } = await supabase.storage
         .from(bucket)
-        .createSignedUrls(path, 3600, {
-            transform: {
-              width: imageSize,
-              height: imageSize,
-        },})    
+        .createSignedUrls(array, 3600)    
     if (error) {
         throw error
     }
@@ -230,6 +231,7 @@ export const getImageUrls = async (path, bucket) => {
     }
 }
 
+// Gets the data on all the attractions from supabase
 export const downloadAttractionsData = async (user_id) => {
     let { data, error } = await supabase
         .rpc('get_attractions_data', {
@@ -239,14 +241,14 @@ export const downloadAttractionsData = async (user_id) => {
         return data;
     }
     if(error){
-        console.log(`Attractions Error: ${error.message}`);
+        Alert.alert("Error Getting Attraction Data", error.message);
     }
 }
 
+// Signs the user up for Tickbox Traveller. Code adapted from here - https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native
 export async function signUpWithEmail(image, email, password, fullName) {
-    let imagePath = await saveImageToSupabase(image, "avatars")
-    
-    const {data, error } = await supabase.auth
+    let imagePath = await saveImageToSupabase(image, "avatars")    
+    const {error } = await supabase.auth
         .signUp({
             email: email,
             password: password,
@@ -258,59 +260,66 @@ export async function signUpWithEmail(image, email, password, fullName) {
                 }
             },
         })
-
     if (error){
-        console.log(error);
         if (error.message === "Database error saving new user"){
             Alert.alert("User name already in use. Please try different user name")
         } else {
-            Alert.alert(error.message)
+            Alert.alert("Error Signing Up User",error.message)
         }            
-    }
-
-    if (data){
-        
     }
 }
 
-export const updateProfile = async (full_name, email, user, image ) => {
+// Updates a user. Takes an updatedUser object, the return value of the function createUserUpdateObject
+export const updateProfile = async (updatedUser) => {
     try{
-        let updatedUser = {}
-        if(user.full_name != full_name){
-            updatedUser.full_name = full_name
+        if(!updatedUser){
+            return;
         }
-        if(image){
-            updatedUser.avatar_url = await saveImageToSupabase(image, "avatars")
-            if(user.avatar_url){
-                removeImage(user.avatar_url, "avatars");
-            }
-        }
-        let updatePackage = {}
-        if (user.email != email){
-            updatePackage.email = email
-        }
-        if (Object.keys(updatedUser).length > 0){
-            updatePackage.data = updatedUser;
-        } 
-        if (Object.keys(updatePackage).length == 0){
-            return false;
-        } 
-        const { error } = await supabase.auth.updateUser(updatePackage)
+        const { error } = await supabase.auth.updateUser(updatedUser)
         if(error){
             throw error;
         }
-        if(email in updatePackage){
+        // If the user updates their email, they need to confirm it via an email link
+        if("email" in updatedUser){
             Alert.alert("Please check new email address to confirm")
         }
         return true
     }
     catch (error) {
-        Alert.alert(error.message);
+        Alert.alert("Error Updating Profile",error.message);
         return false
     } 
 }
 
-export async function insertTick(id, imageUrl, comment){        
+// Checks the new user data against the old and creates an object with the required update values
+export const createUserUpdateObject = async (full_name, email, user, image) => {
+    let updatedUser = {}
+    if(user.full_name != full_name){
+        updatedUser.full_name = full_name
+    }
+    if(image){
+        updatedUser.avatar_url = await saveImageToSupabase(image, "avatars")
+        if(user.avatar_url){
+            removeImage(user.avatar_url, "avatars");
+        }
+    }
+    let updatePackage = {}
+    if (user.email != email){
+        updatePackage.email = email
+    }
+    if (Object.keys(updatedUser).length > 0){
+        updatePackage.data = updatedUser;
+    }
+    // if nothing need to be updated, ie the new data is exactly the same as the old, returns false and no api calls are needed 
+    if (Object.keys(updatePackage).length == 0){
+        return false;
+    }
+    return updatePackage
+}
+
+// Inserts a tick into the ticks table
+export async function insertTick(id, imageUrl, comment){
+    // saves the image to the database
     const imagePath = await saveImageToSupabase(imageUrl, 'tickImages')
     const { data, error } = await supabase
         .from('ticks')
@@ -325,6 +334,7 @@ export async function insertTick(id, imageUrl, comment){
     }
 }
 
+// Removes the tick from the database
 export async function removeTick(id, attraction_id){
     const { data, error } = await supabase
         .from('ticks')
@@ -333,6 +343,7 @@ export async function removeTick(id, attraction_id){
         .eq("attraction_id", attraction_id)
         .select()        
     if (data){
+        // if the tick had an image with it, this deletes the image from the database
         if(data[0].image_url){
             removeImage(data[0].image_url, "tickImages");    
         }
