@@ -20,6 +20,7 @@ import { updateAttractions } from '../helperFunctions/generalFunctions';
 
 // Uses Image Modal library - https://www.npmjs.com/package/react-native-image-modal
 import ImageModal from 'react-native-image-modal';
+import * as Haptics from 'expo-haptics';
 
 // This component displays a tickbox for the user to tick off the attraction. It takes twp props, the attraction,
 // and the width that the image will be. Two different screens use this component, the map screen and the log
@@ -108,6 +109,9 @@ export const TickBoxContainer = ({ attraction, imageWidth }) => {
           onPress={() => {
             if (!isChecked) {
               setChecked(!isChecked);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              )
               animateSplash();
             } else {
               setShowCancelModel(true);

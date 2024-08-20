@@ -127,6 +127,7 @@ const styles = StyleSheet.create({
     color: 'white',
     flex: 1,
     flexWrap: 'wrap',
+    fontFamily: "DM-Serif-Text"
   },
   subheadingText: {
     fontSize: 20,

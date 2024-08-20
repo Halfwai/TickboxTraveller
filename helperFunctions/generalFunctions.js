@@ -20,7 +20,6 @@ export async function uploadImage() {
     });
 
     if (result.canceled || !result.assets || result.assets.length === 0) {
-      console.log('User cancelled image picker.');
       return;
     }
 
@@ -170,7 +169,7 @@ export const saveTimeFormat = async (newFormat) => {
   try {
     await AsyncStorage.setItem('timeFormat', newFormat);
   } catch (error) {
-    console.log(`Error setting time format: ${error}`);
+    Alert.alert("Error setting time format", error.message);
   }
 };
 
@@ -189,7 +188,7 @@ export const saveDistanceFormat = async (newFormat) => {
   try {
     await AsyncStorage.setItem('distanceFormat', newFormat);
   } catch (error) {
-    console.log(`Error setting distance format: ${error}`);
+    Alert.alert("Error setting distance format", error.message);
   }
 };
 
@@ -228,6 +227,7 @@ export const getAttractionData = async (id) => {
   let data = await checkStorageAttractionData();
   if (!data) {
     data = await downloadAttractionsData(id);
+    storeAttractionsData(data);
   }
   return data;
 };

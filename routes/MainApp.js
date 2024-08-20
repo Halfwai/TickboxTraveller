@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, BackHandler, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import * as Haptics from 'expo-haptics';
 
 // Uses UserContext to pass some values around to different screens without prop drilling
 import { UserContext } from '../context/Context';
@@ -142,6 +143,7 @@ export default function MainApp({ session }) {
             setTicksViewData(await getFollowedUserTicks(session?.user.id));
         },
         updateAppState: (newScreen) => {
+            Haptics.selectionAsync()
             updateAppState(
                 newScreen,
                 appState,

@@ -12,7 +12,7 @@ export const Header = (props) => {
       <View style={styles.logoContainer}>
         <TouchableOpacity
           onPress={() => {
-            props.setScreen('home');
+            updateAppState(APPSTATE.HOME);
           }}>
           <Image
             source={require('../assets/images/icon.png')}
@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
     fontSize: 22,
     fontWeight: 'bold',
+    fontFamily: "DM-Serif-Text"
   },
   buttonContainer: {
     flexDirection: 'row',
