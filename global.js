@@ -18,3 +18,11 @@ global.TIMEFORMATSTYLE = {
       SETTINGS: "settings",
       PROFILE: "profile"
   }
+
+export const theme = {
+  fonts: {
+    heading: "DMSerifDisplay_400Regular",
+    regular: "OpenSans_VariableFont",
+    italic: "OpenSans_Italic_VariableFont",
+  },
+};

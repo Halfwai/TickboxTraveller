@@ -8,6 +8,8 @@ import {
   TextInput,
 } from 'react-native';
 
+import { theme } from '../global';
+
 export const CustomButton = (props) => (
   <TouchableOpacity
     {...props}
@@ -51,9 +53,10 @@ const styles = StyleSheet.create({
   },
   customButtonText: {
     color: 'white',
-    fontWeight: 'bold',
+    fontWeight: '600',
     fontSize: 15,
     textAlign: 'center',
+    fontFamily: theme.fonts.regular
   },
   disabledButton: {
     backgroundColor: 'gray',

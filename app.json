@@ -37,12 +37,7 @@
       "url": "https://u.expo.dev/9b45ebbb-3eb1-4599-8ba4-2bce887e31dc"
     },
 "plugins": [
-      [
-        "expo-font",
-        {
-          "fonts": ["./assets/fonts/DMSerifText-Regular.ttf"]
-        }
-      ]
+
     ]
   }
 }

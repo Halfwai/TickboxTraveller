@@ -4,6 +4,8 @@ import { CustomButton } from './GenericComponents';
 import { Input } from '@rneui/themed';
 import { uploadImage } from '../helperFunctions/generalFunctions';
 
+import { theme } from '../global';
+
 // This component displays a modal that allows the user to confirm ticking off a box. It also allows them to add comments and an image to the tick if they wish. It takes four
 // props, the name of the attraction, and three functions that remove the tick, insert it into the database, and hide the modal
 export const ConfirmTickBox = ({
@@ -42,7 +44,7 @@ export const ConfirmTickBox = ({
       )}
       <View style={styles.headingContainer}>
         <Text style={styles.congratText}>Congratulations</Text>
-        <Text>{`for ticking off ${attractionName}`}</Text>
+        <Text style={styles.text}>{`for ticking off ${attractionName}`}</Text>
       </View>
       <Input
         leftIcon={
@@ -124,6 +126,13 @@ const styles = StyleSheet.create({
   congratText: {
     fontSize: 30,
     marginVertical: 10,
+    fontFamily: theme.fonts.heading,
+    lineHeight: 60
+  },
+  text: {
+    fontSize: 20,
+    textAlign: "center",
+    fontFamily: theme.fonts.regular,
   },
   imageContainer: {
     alignItems: 'center',

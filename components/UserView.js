@@ -9,6 +9,7 @@ import { CustomButton } from './GenericComponents';
 import { AvatarImage } from './AvatarImage';
 import { UserContext } from '../context/Context';
 
+import { theme } from '../global';
 // This component displays data on a user on the search screen. Takes three props, the user object, the id of the current user
 // and the action function which sets the ID for the proile to be displayed and shows the profile page.
 export const UserView = ({ userData, sessionId, action }) => {
@@ -71,4 +72,7 @@ const styles = StyleSheet.create({
   button: {
     width: '40%',
   },
+  nameText: {
+    fontFamily: theme.fonts.regular,
+  }
 });

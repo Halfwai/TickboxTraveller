@@ -2,9 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from './lib/supabase';
 import Auth from './routes/Auth';
 import MainApp from './routes/MainApp';
-import { View } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import * as SplashScreen from 'expo-splash-screen';
+import {
+    useFonts,
+    DMSerifDisplay_400Regular,
+    DMSerifDisplay_400Regular_Italic,
+  } from '@expo-google-fonts/dm-serif-display';
+
+import { theme } from './global';
+import * as Font from 'expo-font'
 
 import { StatusBar } from 'expo-status-bar';
 
@@ -19,6 +27,17 @@ SplashScreen.preventAutoHideAsync();
 export default function App() {
   const [session, setSession] = useState(null);
   const [appIsReady, setAppIsReady] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  const loadFonts = async () => {
+    await Font.loadAsync({
+        DMSerifDisplay_400Regular: require('./assets/fonts/DMSerifText-Regular.ttf'),
+        OpenSans_VariableFont: require('./assets/fonts/OpenSans-VariableFont.ttf'),
+        OpenSans_Italic_VariableFont: require("./assets/fonts/OpenSans-Italic-VariableFont.ttf"),
+    });
+    setFontsLoaded(true);
+  };
+
 
   useEffect(() => {
     async function prepare() {
@@ -41,21 +60,27 @@ export default function App() {
       }
     }
     prepare();
+    loadFonts();
   }, []);
 
   const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
+    if (appIsReady && fontsLoaded) {
+        // console.log(DMSerifDisplay_400Regular);
       await SplashScreen.hideAsync();
     }
   }, [appIsReady]);
 
-  if (!appIsReady) {
+  if (!appIsReady || !fontsLoaded) {
     return null;
   }
 
   return (
     <View onLayout={onLayoutRootView}>
       {session && session.user ? (
+        // <View style={{alignItems: "center", justifyContent: "center", height: "100%"}}>
+        //     <Text style={styles.text}>Test</Text>
+        // </View>
+        
         <MainApp key={session.user.id} session={session} />
       ) : (
         <Auth />
@@ -64,3 +89,9 @@ export default function App() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+    text: {
+        fontSize: 30, fontFamily: theme.fonts.regular
+    }
+})

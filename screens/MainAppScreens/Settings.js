@@ -180,7 +180,7 @@ export const Settings = ({
             style={styles.bottomButton}
           />
           <CustomButton
-            text={'Reset Attractions Data'}
+            text={'Reset Data'}
             action={async () => {
               resetAttractionsData();
             }}

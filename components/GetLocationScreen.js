@@ -8,6 +8,8 @@ import { countries, getCitiesByCountryCode } from 'country-city-location';
 
 import { Dropdown } from 'react-native-element-dropdown';
 
+import { theme } from '../global';
+
 // Updates the name of Taiwan
 const updatedCountries = countries.map((country) => {
   if (country.Name == 'Taiwan, Province of China') {
@@ -28,7 +30,7 @@ export const GetLocationScreen = ({ setLocation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.menuBox}>
-        <Text>
+        <Text style={styles.text}>
           Location permission denied, please manually set your location, or
           update permission settings
         </Text>
@@ -80,6 +82,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#1D4A7A',
+  },
+  text: {
+    fontFamily: theme.fonts.regular,
   },
   menuBox: {
     width: '100%',

@@ -3,6 +3,8 @@ import { useContext } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { UserContext } from '../context/Context';
 
+import { theme } from '../global';
+
 // This compnent displays the navigation menu on the bottom of the screen. It takes two props, setScreen is a function that updates a state variable to change the screen displayed,
 // and updates an array with the latest screen for back button functionality. The appState prop is the current screen that the app is on so that the right button is highlighted.
 export function BottomMenu({ setScreen, appState }) {
@@ -100,5 +102,6 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     fontSize: 12,
+    fontFamily: theme.fonts.regular
   },
 });

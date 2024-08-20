@@ -6,6 +6,7 @@ import { formatTime } from '../helperFunctions/generalFunctions';
 import { AvatarImage } from './AvatarImage';
 
 import ImageModal from 'react-native-image-modal';
+import { theme } from '../global';
 
 //This component displays a completed tick. It shows some information on the user that has ticked off an attraction, and
 // the picture and comment from the thick if the user added one. It takes the user as a prop, and also grabs the currentTimeView
@@ -30,7 +31,7 @@ export const TickView = ({ tick }) => {
           size={55}
         />
         <View style={{ flexShrink: 1 }}>
-          <Text style={styles.tickText}>{`${tickData.full_name} `}</Text>
+          <Text style={styles.nameText}>{`${tickData.full_name} `}</Text>
           <Text style={styles.tickText}>
             {`has sucessfully ticked off ${tickData.name}`}
           </Text>
@@ -48,7 +49,7 @@ export const TickView = ({ tick }) => {
         )}
         {tickData.comment && (
           <View style={styles.commentBox}>
-            <Text>{tickData.comment}</Text>
+            <Text style={styles.commentText}>{tickData.comment}</Text>
           </View>
         )}
       </View>
@@ -68,13 +69,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
-
+  nameText: {
+    fontFamily: theme.fonts.regular,
+    fontWeight: "bold"
+  },
   tickText: {
     flexWrap: 'wrap',
   },
   dateText: {
-    fontSize: 12,
-    fontStyle: 'italic',
+    fontSize: 14,
+    fontFamily: theme.fonts.italic,
   },
   tickImage: {
     height: 250,
@@ -85,4 +89,7 @@ const styles = StyleSheet.create({
   commentBox: {
     padding: 20,
   },
+  commentText: {
+    fontFamily: theme.fonts.regular
+  }
 });

@@ -4,6 +4,8 @@ import { AvatarImage } from './AvatarImage';
 import { UserContext } from '../context/Context';
 import { useContext } from 'react';
 
+import { theme } from '../global';
+
 // Conponent for the header. Takes three props. The the user, a function to set the id for the profile to be displayed and shows the profile page, and the name of the current screen
 export const Header = (props) => {
   const { updateAppState } = useContext(UserContext);
@@ -20,8 +22,11 @@ export const Header = (props) => {
             resizeMode="contain"
           />
         </TouchableOpacity>
+        <View style={styles.headingContainer}>
+            <Text style={styles.stateText}>{props.appState}</Text>
+        </View>
 
-        <Text style={styles.stateText}>{props.appState}</Text>
+        
       </View>
       <View style={styles.buttonContainer}>
         {/* Pressing on the users image will send you to thier profile */}
@@ -61,11 +66,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  headingContainer: {
+    height: "100%",
+    alignItems: "center",
+  },
   stateText: {
     textTransform: 'capitalize',
-    fontSize: 22,
-    fontWeight: 'bold',
-    fontFamily: "DM-Serif-Text"
+    fontSize: 30,
+    fontWeight: '600',
+    fontFamily: theme.fonts.heading,
+    color: "white",
+    lineHeight: 50
   },
   buttonContainer: {
     flexDirection: 'row',

@@ -7,6 +7,7 @@ import {
   Animated,
   LayoutAnimation,
   Modal,
+  Touchable,
 } from 'react-native';
 import React, { useState, useRef, useContext } from 'react';
 
@@ -17,6 +18,8 @@ import { ConfirmTickBox } from './ConfirmTickBox';
 import { CancelTickBox } from './CancelTickBox';
 import { removeTick, insertTick } from '../helperFunctions/supabaseFunctions';
 import { updateAttractions } from '../helperFunctions/generalFunctions';
+
+import { theme } from '../global';
 
 // Uses Image Modal library - https://www.npmjs.com/package/react-native-image-modal
 import ImageModal from 'react-native-image-modal';
@@ -68,10 +71,8 @@ export const TickBoxContainer = ({ attraction, imageWidth }) => {
     <View style={styles.tickBoxContainer}>
       <View style={styles.tickBoxTextContainer}>
         <View style={styles.tickBoxHeadingContainer}>
-          <FontAwesome
-            name={showDescription ? 'caret-down' : 'caret-right'}
-            style={styles.toggleIcon}
-            onPress={() => {
+            <Pressable style={styles.dropDownPress}
+                        onPress={() => {
               if (!showDescription) {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
               } else {
@@ -79,16 +80,23 @@ export const TickBoxContainer = ({ attraction, imageWidth }) => {
               }
               setShowDescription(!showDescription);
             }}
+            >
+                          <FontAwesome
+            name={showDescription ? 'caret-down' : 'caret-right'}
+            style={styles.toggleIcon}
+
           />
           <Text style={styles.tickBoxMainText}>{attraction.name}</Text>
+            </Pressable>
+
         </View>
         <View style={styles.tickBoxDistanceContainer}>
-          <Text>{attraction.currentDistance}</Text>
+          <Text style={styles.text}>{attraction.currentDistance}</Text>
         </View>
       </View>
       {showDescription && (
         <View style={styles.descriptionContainer}>
-          <Text>{attraction.description}</Text>
+          <Text style={styles.text}>{attraction.description}</Text>
         </View>
       )}
 
@@ -200,15 +208,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '60%',
   },
+  dropDownPress: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
   tickBoxDistanceContainer: {
     alignItems: 'flex-end',
     justifyContent: 'center',
     width: '40%',
   },
   tickBoxMainText: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    lineHeight: 30,
     flexWrap: 'wrap',
+    fontFamily: theme.fonts.heading,
+  },
+  text: {
+    fontFamily: theme.fonts.regular,
   },
   tickBoxElementContainer: {
     flexDirection: 'row',
