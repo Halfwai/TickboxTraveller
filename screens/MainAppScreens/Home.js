@@ -1,12 +1,17 @@
 import { StyleSheet, View, Text, FlatList } from 'react-native';
 import { TickView } from '../../components/TickView';
+import { useState, useContext } from 'react';
+
+import { UserContext } from '../../context/Context';
 
 // This component displays a FlatList of ticks from the user and other users that they follow
 export const Home = (props) => {
   const ticksData = props.ticksData;
+  const [refreshing, setRefreshing] = useState(false);
+  const { setTicksView, currentUserData } = useContext(UserContext);
+  const [userData] = currentUserData;
   return (
     <View>
-      {ticksData?.length > 0 ? (
         <FlatList
           nestedScrollEnabled
           data={ticksData}
@@ -14,17 +19,21 @@ export const Home = (props) => {
           keyExtractor={(item) => item.id}
           initialNumToRender={5}
           maxToRenderPerBatch={10}
-        />
-      ) : (
-        // if the user has not ticked off any boxes, or follow any other users displays a message
-        // informing them of this.
+          refreshing={refreshing}
+          onRefresh={async() => {
+            setRefreshing(true);
+            await setTicksView(userData.id);
+            setRefreshing(false);
+          }}
+          ListEmptyComponent={() => (
         <View style={styles.textContainer}>
           <Text style={styles.text}>
             Nothing to show here. Please Tick some boxes, or use the search tab
             to find some fellow travellers to follow✈️
           </Text>
         </View>
-      )}
+          )}
+        />
     </View>
   );
 };

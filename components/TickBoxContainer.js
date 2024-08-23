@@ -6,8 +6,7 @@ import {
   Pressable,
   Animated,
   LayoutAnimation,
-  Modal,
-  Touchable,
+  Modal
 } from 'react-native';
 import React, { useState, useRef, useContext } from 'react';
 
@@ -243,6 +242,7 @@ const styles = StyleSheet.create({
   },
   attractionImage: {
     height: 80,
+    backgroundColor: "black"
   },
   tickBox: {
     height: 50,

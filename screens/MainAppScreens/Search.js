@@ -27,7 +27,7 @@ export const Search = ({ session, setProfile }) => {
     []
   );
 
-    const { updateAppState } = useContext(UserContext);
+  const { updateAppState } = useContext(UserContext);
 
   const [selectedId, setSelectedId] = useState('full_name');
   const [searchText, setSearchText] = useState('');
@@ -41,7 +41,7 @@ export const Search = ({ session, setProfile }) => {
   }, [searchText, session, selectedId]);
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.headingContainer}>
         <View style={styles.searchContainer}>
           <FontAwesome name="search" style={styles.searchText} />
@@ -88,17 +88,27 @@ export const Search = ({ session, setProfile }) => {
 };
 
 const styles = StyleSheet.create({
+    container: {
+        height: "100%"
+    },
   headingContainer: {
     borderBottomWidth: 2,
     borderBottomColor: '#51A6F5',
+    flex: 1,
+    justifyContent: "center"
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
     backgroundColor: 'lightgray',
+
+  },
+  searchResultsContainer: {
+    flex: 6
   },
   searchText: {
     fontSize: 20,
+    textAlignVertical: "center"
   },
 });
