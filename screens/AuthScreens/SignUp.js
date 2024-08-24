@@ -50,7 +50,7 @@ export const SignUp = () => {
     // This function performs some front end validation on the user date to be submitted. Supabase also performs
     // some backend validation for example, checking that the email is in the correnct format.
     const validateInput = () => {
-        if(agree == false){
+        if (agree == false) {
             Alert.alert('Please read and accept terms of service');
             return false;
         }
@@ -187,16 +187,16 @@ export const SignUp = () => {
                         size={30}
                         title={
                             <View style={styles.checkboxTitleContainer}>
-                                 <Text>I agree to the </Text>
-                                 <TouchableOpacity
+                                <Text>I agree to the </Text>
+                                <TouchableOpacity
                                     onPress={() => {
                                         setShowTermsOfService(true);
                                     }}
-                                 >
+                                >
                                     <Text style={styles.termsText}>
                                         Terms of Service
                                     </Text>
-                                 </TouchableOpacity>
+                                </TouchableOpacity>
                             </View>
                         }
                         checked={agree}
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     checkboxTitleContainer: {
         flexDirection: "row"
     },
-    checkboxContainer:{
+    checkboxContainer: {
         borderRadius: 10,
         width: "95%"
     },
